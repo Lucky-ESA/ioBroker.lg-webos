@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/types/response.ts"],
+  "sourcesContent": ["/**\n * LGResponse\n */\nexport type LGResponse = {\n    type: string;\n    id?: string;\n    error?: string;\n    payload?: any;\n};\n"],
+  "mappings": ";;;;;;;;;;;;;;AAAA;AAAA;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/types/handshake.ts"],
+  "sourcesContent": ["export type handshake = {\n    forcePairing: boolean;\n    pairingType: string;\n    \"client-key\"?: string;\n    manifest: {\n        manifestVersion: number;\n        appVersion: string;\n        signed: {\n            created: string;\n            appId: string;\n            vendorId: string;\n            localizedAppNames: any;\n            localizedVendorNames: any;\n            permissions: string[];\n            serial: string;\n        };\n        permissions: string[];\n        signatures: any[];\n    };\n};\n"],
+  "mappings": ";;;;;;;;;;;;;;AAAA;AAAA;",
+  "names": []
+}

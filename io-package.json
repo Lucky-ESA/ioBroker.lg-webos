@@ -1,0 +1,156 @@
+{
+    "common": {
+        "name": "lg-webos",
+        "version": "0.0.1",
+        "news": {
+            "0.0.1": {
+                "en": "initial release",
+                "de": "Erstveröffentlichung",
+                "ru": "Начальная версия",
+                "pt": "lançamento inicial",
+                "nl": "Eerste uitgave",
+                "fr": "Première version",
+                "it": "Versione iniziale",
+                "es": "Versión inicial",
+                "pl": "Pierwsze wydanie",
+                "uk": "Початкова версія",
+                "zh-cn": "首次出版"
+            }
+        },
+        "titleLang": {
+            "en": "LG-webOS",
+            "de": "LG-webOS",
+            "ru": "LG-webOS",
+            "pt": "LG-webOS",
+            "nl": "LG-webOS",
+            "fr": "LG-webOS",
+            "it": "LG-webOS",
+            "es": "LG-webOS",
+            "pl": "LG-webOS",
+            "uk": "LG-webOS",
+            "zh-cn": "LG-webOS"
+        },
+        "desc": {
+            "en": "Control your lg tv",
+            "de": "Steuern Sie Ihren LG-Fernseher",
+            "ru": "Управляйте своим телевизором LG",
+            "pt": "Controle sua TV LG",
+            "nl": "Bedien je LG tv",
+            "fr": "Contrôlez votre téléviseur LG",
+            "it": "Controlla la tua TV LG",
+            "es": "Controla tu televisor LG",
+            "pl": "Kontroluj swój telewizor LG",
+            "uk": "Керуйте своїм телевізором LG",
+            "zh-cn": "控制您的LG电视"
+        },
+        "authors": ["Lucky-ESA <github@luckyskills.de>"],
+        "keywords": ["lgtv", "WebOS", "Smart", "TV", "LG", "Remote"],
+        "docs": {
+            "en": ["docs/en/README.md"],
+            "de": ["docs/de/README.md"]
+        },
+        "licenseInformation": {
+            "type": "free",
+            "license": "MIT"
+        },
+        "platform": "Javascript/Node.js",
+        "icon": "lg-webos.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/Lucky-ESA/ioBroker.lg-webos/main/admin/lg-webos.png",
+        "readme": "https://github.com/Lucky-ESA/ioBroker.lg-webos/blob/main/README.md",
+        "loglevel": "info",
+        "tier": 3,
+        "mode": "daemon",
+        "type": "multimedia",
+        "compact": true,
+        "messagebox": true,
+        "blockly": true,
+        "connectionType": "local",
+        "dataSource": "poll",
+        "adminUI": {
+            "config": "json"
+        },
+        "dependencies": [
+            {
+                "js-controller": ">=6.0.11"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=7.6.17"
+            }
+        ]
+    },
+    "native": {
+        "devices": []
+    },
+    "objects": [],
+    "instanceObjects": [
+        {
+            "_id": "",
+            "type": "meta",
+            "common": {
+                "name": {
+                    "en": "Meta storage for user files",
+                    "de": "Meta-Speicher für Benutzerdateien",
+                    "ru": "Meta Storage для файлов пользователей",
+                    "pt": "Meta de armazenamento para arquivos de usuário",
+                    "nl": "Meta opslag voor gebruikersbestanden",
+                    "fr": "Stockage Meta pour les fichiers utilisateur",
+                    "it": "Meta storage per i file utente",
+                    "es": "Meta almacenamiento para archivos de usuario",
+                    "pl": "Meta storage for user files",
+                    "uk": "Зберігання мета для файлів користувачів",
+                    "zh-cn": "用户档案的储存"
+                },
+                "type": "meta.user"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info",
+            "type": "channel",
+            "common": {
+                "name": {
+                    "en": "Information",
+                    "de": "Informationen",
+                    "ru": "Информация",
+                    "pt": "Informação",
+                    "nl": "Informatie",
+                    "fr": "Information",
+                    "it": "Informazioni",
+                    "es": "Información",
+                    "pl": "Informacja",
+                    "uk": "Інформація",
+                    "zh-cn": "信息"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "role": "indicator.connected",
+                "name": {
+                    "en": "Device or service connected",
+                    "de": "Geräte- oder Serviceanschluss",
+                    "ru": "Устройство или сервис подключены",
+                    "pt": "Dispositivo ou serviço conectado",
+                    "nl": "Device of dienst verbonden",
+                    "fr": "Appareil ou service connecté",
+                    "it": "Dispositivo o servizio collegato",
+                    "es": "Dispositivo o servicio conectado",
+                    "pl": "Urządzenie lub usługa połączona",
+                    "uk": "Пристрої або послуги підключені",
+                    "zh-cn": "证人或有关服务"
+                },
+                "type": "boolean",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        }
+    ]
+}

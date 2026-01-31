@@ -1,0 +1,128 @@
+{
+    "i18n": true,
+    "type": "panel",
+    "items": {
+        "tab1": {
+            "type": "panel",
+            "label": "lg-webos adapter settings",
+            "newLine": true,
+            "items": {
+                "_headerAdapter": {
+                    "type": "header",
+                    "text": "Create devices",
+                    "size": 2
+                },
+                "devices": {
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12,
+                    "noDelete": false,
+                    "type": "table",
+                    "items": [
+                        {
+                            "type": "checkbox",
+                            "attr": "active",
+                            "width": "10 %",
+                            "title": "activ",
+                            "tooltip": "activ_tt",
+                            "filter": true,
+                            "sort": true,
+                            "default": false,
+                            "style": {
+                                "textAlign": "center"
+                            }
+                        },
+                        {
+                            "type": "select",
+                            "attr": "ws",
+                            "width": "10 %",
+                            "title": "ws",
+                            "tooltip": "ws_tt",
+                            "filter": false,
+                            "sort": false,
+                            "options": [
+                                { "value": "ws", "label": "WS Connection" },
+                                { "value": "wss", "label": "WSS Connection" }
+                            ],
+                            "default": "wss"
+                        },
+                        {
+                            "type": "text",
+                            "attr": "tvname",
+                            "width": "15 %",
+                            "title": "name",
+                            "tooltip": "name_tt",
+                            "filter": false,
+                            "sort": false,
+                            "default": "Dummy"
+                        },
+                        {
+                            "type": "text",
+                            "attr": "ip",
+                            "width": "13 %",
+                            "title": "tvip",
+                            "tooltip": "tvip_tt",
+                            "filter": false,
+                            "sort": false
+                        },
+                        {
+                            "type": "text",
+                            "attr": "mac",
+                            "width": "12 %",
+                            "title": "mac",
+                            "tooltip": "mac_tt",
+                            "filter": false,
+                            "sort": false
+                        },
+                        {
+                            "type": "number",
+                            "attr": "interval",
+                            "width": "10 %",
+                            "title": "interval",
+                            "tooltip": "interval_tt",
+                            "min": 0,
+                            "max": 1440,
+                            "step": 1,
+                            "filter": false,
+                            "sort": false,
+                            "default": 0
+                        },
+                        {
+                            "type": "checkbox",
+                            "attr": "luna",
+                            "width": "10 %",
+                            "title": "luna",
+                            "tooltip": "luna_tt",
+                            "filter": false,
+                            "sort": false,
+                            "default": false
+                        },
+                        {
+                            "type": "checkbox",
+                            "attr": "oldDevice",
+                            "width": "10 %",
+                            "title": "old",
+                            "tooltip": "old_tt",
+                            "filter": false,
+                            "sort": false,
+                            "default": false
+                        },
+                        {
+                            "type": "checkbox",
+                            "attr": "picture",
+                            "width": "10 %",
+                            "title": "pic",
+                            "tooltip": "pic_tt",
+                            "filter": false,
+                            "sort": false,
+                            "default": false
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

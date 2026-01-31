@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/types/request.ts"],
+  "sourcesContent": ["import type { AxiosResponse } from \"../types/object\";\n/**\n * AxiosRrequest\n */\nexport interface AxiosRrequest {\n    /**\n     * @param url Icon URL\n     * @returns axios response\n     */\n    get(url: string): Promise<AxiosResponse>;\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;AAAA;AAAA;",
+  "names": []
+}
