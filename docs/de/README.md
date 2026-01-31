@@ -10,20 +10,20 @@ Einige States haben bei ältere TV`s keine Funktion. Leider habe ich keine Infos
 
 # Zusammenfassung
 
-- [Instanz Einstellung](#instance-setting)
-- [Key Objekte](#key-objects)
-- [Cusor Objekte](#cursor-objects)
-- [Notify Objekte](#notify-objects)
-- [Own request Objekte)](#own-request-objects)
-- [State Objekte](#state-objects)
-- [Status Objekte](#status-object)
-- [System Objekte](#system-objects)
-- [Einstellung Objekte](#setting-objects)
+- [Instanz Einstellung](#instanz-einstellung)
+- [Key Objekte](#key-objekte)
+- [Cusor Objekte](#cursor-objekte)
+- [Notify Objekte](#notify-objekte)
+- [Own request Objekte](#eigene-anfragen-objekte)
+- [State Objekte](#state-objekte)
+- [Status Objekte](#status-objekte)
+- [System Objekte](#system-objekte)
+- [Einstellung Objekte](#system-einstellungs-objekte)
 - [Blockly](#blockly)
-- [Bekannte Endpunkte](#known-endpoints)
-- [Javascript sendTo]()
-- [Javascript sendTo direkte Anfragen](#example-javascript-sendto-direct-request)
-- [Beispiel Anwort vom TV]()
+- [Bekannte Endpunkte](#bekannte-endpunkte)
+- [Javascript sendTo](#beispiele-javascript-sendto)
+- [Javascript sendTo direkte Anfragen](#beispiele-javascript-sendto-direkte-anfragen)
+- [Beispiel Anwort vom TV](#beispiele-tv-antworten-lg-2024)
 
 ![object_overview.png](img/object_overview.png)
 
