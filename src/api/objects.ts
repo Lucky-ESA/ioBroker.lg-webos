@@ -3427,7 +3427,7 @@ export class creatObjects implements Objects {
                 },
                 desc: "Create by Adapter",
                 read: true,
-                write: false,
+                write: true,
                 def: "",
             };
             await this.createDataPoint(`${this.dev.dp}.remote.states.channelId`, common, "state", null, null, null);
