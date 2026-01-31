@@ -303,9 +303,9 @@ class TVHandler extends import_node_events.EventEmitter {
       this.isConnected = true;
       void this.updateStatus(true);
       this.errorCount = 0;
-      this.adapter.log.info(`LGTV ${this.uri} opened`);
+      this.adapter.log.debug(`LGTV ${this.uri} opened`);
       if (open && open.returnValue) {
-        this.adapter.log.info(`Open: ${JSON.stringify(open.returnValue)}`);
+        this.adapter.log.debug(`Open: ${JSON.stringify(open.returnValue)}`);
       }
       if (typeof this.key !== "string" || !this.isRegistered) {
         if (!this.key || this.key == "") {
@@ -369,7 +369,7 @@ class TVHandler extends import_node_events.EventEmitter {
       await this.updatePointerStatus(true);
       this.adapter.log.debug(`LGTV cursor connection ${this.uri} opened`);
       if (open && open.returnValue) {
-        this.adapter.log.info(`Open cursor: ${JSON.stringify(open.returnValue)}`);
+        this.adapter.log.debug(`Open cursor: ${JSON.stringify(open.returnValue)}`);
       }
       if (this.openPointerRequest.first && this.openPointerRequest.type && this.openPointerRequest.uri) {
         this.sendCommand(
