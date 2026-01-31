@@ -892,7 +892,7 @@ class creatObjects {
         desc: "Create by Adapter",
         read: true,
         write: false,
-        def: "false"
+        def: false
       };
       await this.createDataPoint(`${this.dev.dp}.status.pointerConnection`, common, "state", false, null, null);
     }

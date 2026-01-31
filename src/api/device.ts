@@ -112,6 +112,7 @@ export class TVHandler extends EventEmitter implements Device {
      */
     private async onReady(): Promise<void> {
         await this.objects.createDevice();
+        await this.objects.createPointerConnection();
         const state = await this.adapter.getStateAsync(`${this.dp}.system.pair_code`);
         if (state && state.val && typeof state.val === "string" && state.val.includes("aes-192-cbc")) {
             this.key = this.adapter.decrypt(state.val);
@@ -554,7 +555,6 @@ export class TVHandler extends EventEmitter implements Device {
             await this.objects.createApps(val);
         } else if (val.payload.socketPath != null && val.payload.socketPath != "") {
             this.socketPath = val.payload.socketPath;
-            await this.objects.createPointerConnection();
         } else if (val.payload.state) {
             await this.objects.createPowerState(val);
         } else if (val.payload.channel) {
