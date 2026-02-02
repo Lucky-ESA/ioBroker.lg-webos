@@ -137,7 +137,7 @@ class LgWebos extends utils.Adapter {
    * @param state - State object
    */
   onStateChange(id, state) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _A, _B, _C, _D, _E, _F, _G, _H, _I, _J, _K, _L, _M, _N, _O, _P, _Q, _R, _S, _T, _U, _V, _W, _X, _Y;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _A, _B, _C, _D, _E, _F, _G, _H, _I, _J, _K, _L, _M, _N, _O, _P, _Q, _R, _S, _T, _U, _V, _W, _X;
     if (state && !state.ack) {
       const idParts = id.split(".");
       const command = idParts.pop();
@@ -289,6 +289,7 @@ class LgWebos extends utils.Adapter {
             });
           }
           break;
+        case "input":
         case "launch":
           if (typeof state.val === "string" && state.val != null && state.val != "unknown") {
             (_v = this.devices.get(deviceId)) == null ? void 0 : _v.request(id, "request", import_helper.Endpoint.LAUNCH, {
@@ -296,65 +297,58 @@ class LgWebos extends utils.Adapter {
             });
           }
           break;
-        case "input":
-          if (typeof state.val === "string" && state.val != null) {
-            (_w = this.devices.get(deviceId)) == null ? void 0 : _w.request(id, "request", import_helper.Endpoint.SET_INPUT, {
-              inputId: state.val
-            });
-          }
-          break;
         case "soundOutput":
-          (_x = this.devices.get(deviceId)) == null ? void 0 : _x.request(id, "request", import_helper.Endpoint.CHANGE_SOUND_OUTPUT, { output: state.val });
+          (_w = this.devices.get(deviceId)) == null ? void 0 : _w.request(id, "request", import_helper.Endpoint.CHANGE_SOUND_OUTPUT, { output: state.val });
           break;
         case "volume":
           if (typeof state.val === "number" && state.val != null && state.val >= 0 && state.val <= 100) {
-            (_y = this.devices.get(deviceId)) == null ? void 0 : _y.request(id, "request", import_helper.Endpoint.SET_VOLUME, { volume: state.val });
+            (_x = this.devices.get(deviceId)) == null ? void 0 : _x.request(id, "request", import_helper.Endpoint.SET_VOLUME, { volume: state.val });
           }
           break;
         case "powerOff":
-          (_z = this.devices.get(deviceId)) == null ? void 0 : _z.request(id, "request", import_helper.Endpoint.POWER_OFF);
+          (_y = this.devices.get(deviceId)) == null ? void 0 : _y.request(id, "request", import_helper.Endpoint.POWER_OFF);
           break;
         case "powerOn":
-          void ((_A = this.devices.get(deviceId)) == null ? void 0 : _A.wol(id));
+          void ((_z = this.devices.get(deviceId)) == null ? void 0 : _z.wol(id));
           break;
         case "screenOff":
           level = import_helper.Endpoint.TURN_OFF_SCREEN;
           if (this.oldDevice.get(deviceId)) {
             level = import_helper.Endpoint.TURN_OFF_SCREEN_OD;
           }
-          (_B = this.devices.get(deviceId)) == null ? void 0 : _B.request(id, "request", level, { standbyMode: "active" });
+          (_A = this.devices.get(deviceId)) == null ? void 0 : _A.request(id, "request", level, { standbyMode: "active" });
           break;
         case "screenOn":
           level = import_helper.Endpoint.TURN_ON_SCREEN;
           if (this.oldDevice.get(deviceId)) {
             level = import_helper.Endpoint.TURN_ON_SCREEN_OD;
           }
-          (_C = this.devices.get(deviceId)) == null ? void 0 : _C.request(id, "request", level, { standbyMode: "active" });
+          (_B = this.devices.get(deviceId)) == null ? void 0 : _B.request(id, "request", level, { standbyMode: "active" });
           break;
         case "closeAlert":
           if (state.val != null && state.val != "no") {
-            void ((_D = this.devices.get(deviceId)) == null ? void 0 : _D.MessageHandler(id, "closeAlert", import_helper.Endpoint.CLOSE_ALERT, { alertId: state.val }));
+            void ((_C = this.devices.get(deviceId)) == null ? void 0 : _C.MessageHandler(id, "closeAlert", import_helper.Endpoint.CLOSE_ALERT, { alertId: state.val }));
           }
           break;
         case "createAlert":
-          void ((_E = this.devices.get(deviceId)) == null ? void 0 : _E.MessageHandler(id, "createAlert", import_helper.Endpoint.CREATE_ALERT, {
+          void ((_D = this.devices.get(deviceId)) == null ? void 0 : _D.MessageHandler(id, "createAlert", import_helper.Endpoint.CREATE_ALERT, {
             message: state.val,
             buttons: [{ label: "OK" }]
           }));
           break;
         case "closeToast":
           if (state.val != null && state.val != "no") {
-            void ((_F = this.devices.get(deviceId)) == null ? void 0 : _F.MessageHandler(id, "closeToast", import_helper.Endpoint.CLOSE_TOAST, { toastId: state.val }));
+            void ((_E = this.devices.get(deviceId)) == null ? void 0 : _E.MessageHandler(id, "closeToast", import_helper.Endpoint.CLOSE_TOAST, { toastId: state.val }));
           }
           break;
         case "createToast":
-          void ((_G = this.devices.get(deviceId)) == null ? void 0 : _G.MessageHandler(id, "createToast", import_helper.Endpoint.CREATE_TOAST, { message: state.val }));
+          void ((_F = this.devices.get(deviceId)) == null ? void 0 : _F.MessageHandler(id, "createToast", import_helper.Endpoint.CREATE_TOAST, { message: state.val }));
           break;
         case "request":
           this.own_request(deviceId, state);
           break;
         case "click":
-          (_H = this.devices.get(deviceId)) == null ? void 0 : _H.request(id, "pointer", import_helper.Endpoint.CURSOR_CLICK, null, "");
+          (_G = this.devices.get(deviceId)) == null ? void 0 : _G.request(id, "pointer", import_helper.Endpoint.CURSOR_CLICK, null, "");
           break;
         case "drag":
           if (state.val && ~state.val.toString().indexOf(",")) {
@@ -362,7 +356,7 @@ class LgWebos extends utils.Adapter {
             const dx = parseInt(vals[0]);
             const dy = parseInt(vals[1]);
             const drag = vals[2] == "drag" ? 1 : 0;
-            (_I = this.devices.get(deviceId)) == null ? void 0 : _I.request(
+            (_H = this.devices.get(deviceId)) == null ? void 0 : _H.request(
               id,
               "pointer",
               import_helper.Endpoint.CURSOR_DRAG,
@@ -380,36 +374,36 @@ class LgWebos extends utils.Adapter {
             const vals = state.val.toString().split(",");
             const dx = parseInt(vals[0]);
             const dy = parseInt(vals[1]);
-            (_J = this.devices.get(deviceId)) == null ? void 0 : _J.request(id, "pointer", import_helper.Endpoint.CURSOR_SCROLL, { dx, dy }, "");
+            (_I = this.devices.get(deviceId)) == null ? void 0 : _I.request(id, "pointer", import_helper.Endpoint.CURSOR_SCROLL, { dx, dy }, "");
           }
           break;
         case "mdnLog":
           if (state.val != null && typeof state.val === "boolean") {
-            (_K = this.devices.get(deviceId)) == null ? void 0 : _K.mdnLog(state.val);
+            (_J = this.devices.get(deviceId)) == null ? void 0 : _J.mdnLog(state.val);
           }
           break;
         case "deleteText":
-          (_L = this.devices.get(deviceId)) == null ? void 0 : _L.request(id, "request", import_helper.Endpoint.SEND_DELETE);
+          (_K = this.devices.get(deviceId)) == null ? void 0 : _K.request(id, "request", import_helper.Endpoint.SEND_DELETE);
           break;
         case "insertText":
           if (state.val != null && typeof state.val === "string") {
-            (_M = this.devices.get(deviceId)) == null ? void 0 : _M.request(id, "request", import_helper.Endpoint.INSERT_TEXT, { text: state.val });
+            (_L = this.devices.get(deviceId)) == null ? void 0 : _L.request(id, "request", import_helper.Endpoint.INSERT_TEXT, { text: state.val });
           }
           break;
         case "closeLaunch":
-          (_N = this.devices.get(deviceId)) == null ? void 0 : _N.request(id, "request", import_helper.Endpoint.LAUNCHER_CLOSE);
+          (_M = this.devices.get(deviceId)) == null ? void 0 : _M.request(id, "request", import_helper.Endpoint.LAUNCHER_CLOSE);
           break;
         case "screenshot":
-          (_O = this.devices.get(deviceId)) == null ? void 0 : _O.request(id, "request", import_helper.Endpoint.TAKE_SCREENSHOT);
+          (_N = this.devices.get(deviceId)) == null ? void 0 : _N.request(id, "request", import_helper.Endpoint.TAKE_SCREENSHOT);
           break;
         case "closeWebApp":
-          (_P = this.devices.get(deviceId)) == null ? void 0 : _P.request(id, "request", import_helper.Endpoint.CLOSE_WEB_APP);
+          (_O = this.devices.get(deviceId)) == null ? void 0 : _O.request(id, "request", import_helper.Endpoint.CLOSE_WEB_APP);
           break;
         case "screenSaver":
-          (_Q = this.devices.get(deviceId)) == null ? void 0 : _Q.request(id, "request", import_helper.Endpoint.LUNA_TURN_ON_SCREEN_SAVER, {}, "luna://");
+          (_P = this.devices.get(deviceId)) == null ? void 0 : _P.request(id, "request", import_helper.Endpoint.LUNA_TURN_ON_SCREEN_SAVER, {}, "luna://");
           break;
         case "showInputPicker":
-          (_R = this.devices.get(deviceId)) == null ? void 0 : _R.request(id, "request", import_helper.Endpoint.LUNA_SHOW_INPUT_PICKER, null, "luna://");
+          (_Q = this.devices.get(deviceId)) == null ? void 0 : _Q.request(id, "request", import_helper.Endpoint.LUNA_SHOW_INPUT_PICKER, null, "luna://");
           break;
         case "brightness":
         case "backlight":
@@ -417,12 +411,12 @@ class LgWebos extends utils.Adapter {
         case "color":
         case "sharpness":
         case "tint":
-          settings[command] = (_S = state.val) == null ? void 0 : _S.toString();
+          settings[command] = (_R = state.val) == null ? void 0 : _R.toString();
           if (this.picture.get(deviceId)) {
             system = import_helper.Endpoint.SET_SYSTEM_SETTINGS;
             method = "ssap://";
           }
-          (_T = this.devices.get(deviceId)) == null ? void 0 : _T.request(
+          (_S = this.devices.get(deviceId)) == null ? void 0 : _S.request(
             id,
             "request",
             system,
@@ -449,7 +443,7 @@ class LgWebos extends utils.Adapter {
             system = import_helper.Endpoint.SET_SYSTEM_SETTINGS;
             method = "ssap://";
           }
-          (_U = this.devices.get(deviceId)) == null ? void 0 : _U.request(
+          (_T = this.devices.get(deviceId)) == null ? void 0 : _T.request(
             id,
             "request",
             system,
@@ -468,7 +462,7 @@ class LgWebos extends utils.Adapter {
             system = import_helper.Endpoint.SET_SYSTEM_SETTINGS;
             method = "ssap://";
           }
-          (_V = this.devices.get(deviceId)) == null ? void 0 : _V.request(
+          (_U = this.devices.get(deviceId)) == null ? void 0 : _U.request(
             id,
             "request",
             system,
@@ -487,7 +481,7 @@ class LgWebos extends utils.Adapter {
                 system = import_helper.Endpoint.SET_SYSTEM_SETTINGS;
                 method = "ssap://";
               }
-              (_W = this.devices.get(deviceId)) == null ? void 0 : _W.request(
+              (_V = this.devices.get(deviceId)) == null ? void 0 : _V.request(
                 id,
                 "request",
                 system,
@@ -511,7 +505,7 @@ class LgWebos extends utils.Adapter {
             system = import_helper.Endpoint.SET_SYSTEM_SETTINGS;
             method = "ssap://";
           }
-          (_X = this.devices.get(deviceId)) == null ? void 0 : _X.request(
+          (_W = this.devices.get(deviceId)) == null ? void 0 : _W.request(
             id,
             "request",
             system,
@@ -527,7 +521,7 @@ class LgWebos extends utils.Adapter {
             system = import_helper.Endpoint.SET_SYSTEM_SETTINGS;
             method = "ssap://";
           }
-          (_Y = this.devices.get(deviceId)) == null ? void 0 : _Y.request(
+          (_X = this.devices.get(deviceId)) == null ? void 0 : _X.request(
             id,
             "request",
             system,

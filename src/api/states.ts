@@ -270,6 +270,7 @@ export class updateStates implements States {
      * Convert Time String
      *
      * @param t time string e.g. 2026,01,17,17,13,46
+     * @returns times string
      */
     public convertTimeString(t: string): string {
         return `${t[0]}-${t[1]}-${t[2]} ${t[3]}:${t[4]}:${t[5]}`;

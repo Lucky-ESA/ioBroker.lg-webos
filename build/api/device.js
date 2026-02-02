@@ -84,6 +84,8 @@ class TVHandler extends import_node_events.EventEmitter {
     this.log = false;
     this.pair = import_handshake.handshake_notpaired;
     this.socketPath = "";
+    this.isStatus = false;
+    this.isStatusTimeout = void 0;
     this.openPointerRequest = {
       type: void 0,
       uri: void 0,
@@ -120,6 +122,7 @@ class TVHandler extends import_node_events.EventEmitter {
   pointerCheck;
   checkTVStatus;
   startWebSocketDelay;
+  isStatusTimeout;
   log;
   pair;
   getRequest;
@@ -128,6 +131,7 @@ class TVHandler extends import_node_events.EventEmitter {
   isSettings = [];
   isStart = false;
   closeWS = "";
+  isStatus;
   /**
    * Start Class
    */
@@ -285,7 +289,7 @@ class TVHandler extends import_node_events.EventEmitter {
         if (error.message == "TIMEOUT") {
           if (this.errorCount > 15) {
             void this.startWatching();
-            this.adapter.log.info(`Devices ${this.ip} likely offline. Start MDNS monitoring.`);
+            this.adapter.log.debug(`Devices ${this.ip} likely offline. Start MDNS monitoring.`);
             this.errorCount = 16;
           }
         }
@@ -452,14 +456,31 @@ class TVHandler extends import_node_events.EventEmitter {
    * @param val boolean
    */
   async updateStatus(val) {
-    await this.adapter.setState(`${this.dp}.status.online`, { val, ack: true });
-    if (!val) {
-      const available = this.getRespRequestFind(import_helper.Endpoint.GET_POWER_STATE, "uri");
-      if (available && available[1] && available[1].response == "response") {
-        await this.adapter.setState(`${this.dp}.status.powerState`, { val: "unknown", ack: true });
+    if (this.isStatus != val) {
+      if (!val) {
+        if (!this.isStatusTimeout) {
+          this.isStatusTimeout = this.adapter.setTimeout(async () => {
+            this.isStatus = val;
+            await this.adapter.setState(`${this.dp}.status.online`, { val, ack: true });
+            const available = this.getRespRequestFind(import_helper.Endpoint.GET_POWER_STATE, "uri");
+            if (available && available[1] && available[1].response == "response") {
+              await this.adapter.setState(`${this.dp}.status.powerState`, {
+                val: "unknown",
+                ack: true
+              });
+            }
+            this.isStatusTimeout = void 0;
+            this.emit("update", this.dp, val);
+          }, 60 * 1e3);
+        }
+      } else {
+        this.isStatusTimeout && this.adapter.clearTimeout(this.isStatusTimeout);
+        this.isStatusTimeout = void 0;
+        this.isStatus = val;
+        await this.adapter.setState(`${this.dp}.status.online`, { val, ack: true });
+        this.emit("update", this.dp, val);
       }
     }
-    this.emit("update", this.dp, val);
   }
   /**
    * Set Online Status for cursor connection
@@ -836,7 +857,7 @@ class TVHandler extends import_node_events.EventEmitter {
           }
         }
         if (isOnline) {
-          this.adapter.log.info(`Found device ${this.ip}`);
+          this.adapter.log.debug(`Found device ${this.ip}`);
           (_a = this.mdn) == null ? void 0 : _a.destroy();
           this.mdn = null;
           this.delayStartWebSocket();
@@ -1476,7 +1497,9 @@ class TVHandler extends import_node_events.EventEmitter {
     this.pointerCheck && this.adapter.clearTimeout(this.pointerCheck);
     this.checkTVStatus && this.adapter.clearInterval(this.checkTVStatus);
     this.startWebSocketDelay && this.adapter.clearTimeout(this.startWebSocketDelay);
-    await this.updateStatus(false);
+    this.isStatusTimeout && this.adapter.clearTimeout(this.isStatusTimeout);
+    await this.adapter.setState(`${this.dp}.status.online`, { val: false, ack: true });
+    await this.adapter.setState(`${this.dp}.status.powerState`, { val: "unknown", ack: true });
     await this.updatePointerStatus(false);
   }
 }

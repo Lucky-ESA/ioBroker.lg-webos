@@ -282,17 +282,11 @@ class LgWebos extends utils.Adapter {
                         });
                     }
                     break;
+                case "input":
                 case "launch":
                     if (typeof state.val === "string" && state.val != null && state.val != "unknown") {
                         this.devices.get(deviceId)?.request(id, "request", Endpoint.LAUNCH, {
                             id: state.val,
-                        });
-                    }
-                    break;
-                case "input":
-                    if (typeof state.val === "string" && state.val != null) {
-                        this.devices.get(deviceId)?.request(id, "request", Endpoint.SET_INPUT, {
-                            inputId: state.val,
                         });
                     }
                     break;
