@@ -80,6 +80,7 @@ export type Status = {
 export type ConfigDevice = {
     active: boolean;
     ws: string;
+    discover: string;
     tvname: string | null;
     ip: string;
     mac: string;
@@ -88,6 +89,15 @@ export type ConfigDevice = {
     oldDevice: boolean;
     picture: boolean;
     dp?: string;
+    system: [
+        {
+            category: string;
+            settings: string;
+            role: string;
+            type: string;
+            attr: string;
+        },
+    ];
 };
 
 /**

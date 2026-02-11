@@ -41,9 +41,9 @@ Einige States haben bei ältere TV`s keine Funktion. Leider habe ich keine Infos
 - `Alte Commandos`: Einige Geräte benötigen für sreen_on, screen_off oder reboot_soft einen anderen Endpoint. Es ist auch möglich das der TV beide nicht unterstützt.
 - `Bild`: Nach der ersten Verbindung werden mögliche Einstellungen in `status.possibleSettings` geschrieben (Objekte werden unter settings angelegt). Werden dort nun Einstellungen aufgelistet, dann hiermit probieren ob Einstellungen geändert werden können. Sind mit oder ohne Haken keine Einstellungen möglich, dann muss LUNA aktiviert werden. Der mir bekannt TV 55NANO81T6A unterstützt nur LUNA Request mit Workaround.
 
-`Bild` ohne Haken: luna://com.webos.settingsservice/setSystemSettings
-`Bild` mit Haken: ssap://settings/setSystemSettings
-`Bild` ohne Haken und LUNA aktiv: Woraround Luna Request per Toast Notification
+- `Bild` ohne Haken: luna://com.webos.settingsservice/setSystemSettings
+- `Bild` mit Haken: ssap://settings/setSystemSettings
+- `Bild` ohne Haken und LUNA aktiv: Woraround Luna Request per Toast Notification
 
 ```json
 [
@@ -71,7 +71,17 @@ Einige States haben bei ältere TV`s keine Funktion. Leider habe ich keine Infos
 ]
 ```
 
-    ![instance.png](img/instance.png)
+### TV Systemeinstellungen
+
+- `Kategorie` Kategorien [siehe Beispiele](https://github.com/chros73/bscpylgtv/blob/master/docs/)
+- `Einstellungen` Einstellungen [siehe Beispiele](https://github.com/chros73/bscpylgtv/blob/master/docs/)
+- `Rolle` Rollen [siehe Beispiele](https://www.iobroker.net/#en/documentation/dev/stateroles.md)
+- `Typ` Typen [siehe Beispiele](https://www.iobroker.net/#en/documentation/dev/stateroles.md)
+- `Attribut` Zusätzliche Attribute [siehe Beispiele](https://github.com/ioBroker/ioBroker.docs/blob/master/docs/en/dev/objectsschema.md)
+
+![instance.png](img/instance.png)<br>
+![instance_1.png](img/instance_1.png)<br>
+![instance_2.png](img/instance_2.png)
 
 ### Key Objekte
 

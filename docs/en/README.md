@@ -71,7 +71,17 @@ Some states don't work on older TVs. Unfortunately, I don't have information on 
 ]
 ```
 
-    ![instance.png](img/instance.png)
+### TV System Settings
+
+- `Category` Category [Example](https://github.com/chros73/bscpylgtv/blob/master/docs/)
+- `Seettings` Settings [Example](https://github.com/chros73/bscpylgtv/blob/master/docs/)
+- `Role` Roles [Example](https://www.iobroker.net/#en/documentation/dev/stateroles.md)
+- `Type` Types [Example](https://www.iobroker.net/#en/documentation/dev/stateroles.md)
+- `Attribute` Add. Attribute [Example](https://github.com/ioBroker/ioBroker.docs/blob/master/docs/en/dev/objectsschema.md)
+
+![instance.png](img/instance.png)<br>
+![instance_1.png](img/instance_1.png)<br>
+![instance_2.png](img/instance_2.png)
 
 ### Key objects
 

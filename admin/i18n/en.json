@@ -21,5 +21,22 @@
     "old": "Old Commands",
     "old_tt": "Uses old commands for screen_off, screen_on and reboot_soft",
     "pic": "Picture",
-    "pic_tt": "Uses old picture settings for old devices"
+    "pic_tt": "Uses old picture settings for old devices",
+    "discover": "Discover",
+    "discover_tt": "Detects whether the TV is visible on the network.",
+    "DNS": "DNS Discover",
+    "SSDP": "SSDP Discover",
+    "systemSettings": "System settings",
+    "category": "Category",
+    "category_tt": "Select category",
+    "settings": "Settings",
+    "settings_tt": "Select category setting",
+    "role_t": "Object role",
+    "role_tt": "ioBroker object role",
+    "type_t": "Type",
+    "type_tt": "ioBroker object type",
+    "attr": "Attribute",
+    "attr_tt": "Additional attribute as JSON e.g. unit,min,max,step,states",
+    "object_name": "Object name",
+    "object_name_tt": "ioBroker object name"
 }

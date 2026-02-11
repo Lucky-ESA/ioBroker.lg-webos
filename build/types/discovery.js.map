@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/types/discovery.ts"],
+  "sourcesContent": ["/**\n * Discovery\n */\nexport interface Discovery {\n    /**\n     * Start watching\n     *\n     * @param ip Device IP\n     */\n    discovery(ip: string): void;\n    /**\n     * destroy\n     */\n    destroy(): void;\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;AAAA;AAAA;",
+  "names": []
+}

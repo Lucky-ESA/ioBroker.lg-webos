@@ -35,6 +35,7 @@ var import_multicast_dns = __toESM(require("multicast-dns"));
 var import_node_events = require("node:events");
 var import_partysocket = require("partysocket");
 var import_uuid = require("uuid");
+var import_discovery = require("./discovery");
 var import_handshake = require("./handshake");
 var import_helper = require("./helper");
 var import_objects = require("./objects");
@@ -63,6 +64,7 @@ class TVHandler extends import_node_events.EventEmitter {
     this.dp = device.dp;
     this.mac = device.mac;
     this.interval = device.interval;
+    this.discovery = device.discover;
     this.luna = device.luna;
     this.key = null;
     this.isConnected = false;
@@ -79,6 +81,8 @@ class TVHandler extends import_node_events.EventEmitter {
     this.checkTVStatus = void 0;
     this.pointerCheck = void 0;
     this.startWebSocketDelay = void 0;
+    this.promiseDirectTimeout = void 0;
+    this.promiseTimeout = void 0;
     this.objects = new import_objects.creatObjects(device, iob);
     this.states = new import_states.updateStates(device, iob);
     this.log = false;
@@ -94,6 +98,8 @@ class TVHandler extends import_node_events.EventEmitter {
       prefix: void 0
     };
     void this.onReady();
+    this.discover = new import_discovery.lgtv_discovery(iob);
+    this.discover.on("update", this.getUpdateDiscovery.bind(this));
   }
   adapter;
   mdn;
@@ -123,15 +129,18 @@ class TVHandler extends import_node_events.EventEmitter {
   checkTVStatus;
   startWebSocketDelay;
   isStatusTimeout;
+  promiseTimeout;
+  promiseDirectTimeout;
   log;
   pair;
   getRequest;
   socketPath;
   openPointerRequest;
   isSettings = [];
-  isStart = false;
   closeWS = "";
   isStatus;
+  discover;
+  discovery;
   /**
    * Start Class
    */
@@ -165,7 +174,6 @@ class TVHandler extends import_node_events.EventEmitter {
       try {
         const allStarts = JSON.parse(respStart.val);
         if (typeof allStarts === "object" && allStarts.length > 0) {
-          this.isStart = true;
           for (const allStar of allStarts) {
             this.reqResp.push([
               allStar[0].toString(),
@@ -203,6 +211,10 @@ class TVHandler extends import_node_events.EventEmitter {
       this.isConnected = true;
       this.adapter.log.debug(`LGTV message for ${this.uri}`);
       if (message && message.data) {
+        if (!this.isStatus || this.isStatusTimeout) {
+          this.isStatus = false;
+          void this.updateStatus(true);
+        }
         this.adapter.log.debug(`Message: ${JSON.stringify(message.data)}`);
         try {
           const payload = JSON.parse(message.data);
@@ -510,7 +522,7 @@ class TVHandler extends import_node_events.EventEmitter {
     });
     const settings = [];
     for (const r of this.reqResp) {
-      if (r[1].settings != "No Value" && r[1].settings != "" && r[1].category == "picture" && !r[1].settings.includes(",")) {
+      if (r[1].response != "response" && r[1].settings != "No Value" && r[1].settings != "" && r[1].category == "picture" && !r[1].settings.includes(",")) {
         settings.push(r[1].settings);
       }
     }
@@ -557,6 +569,8 @@ class TVHandler extends import_node_events.EventEmitter {
       await this.states.updateChannel(val);
     } else if (val.payload.channelTypeName) {
       await this.states.updateChannelSwitch(val);
+    } else if (val.payload.programId) {
+      await this.states.updateProgram(val);
     } else if (val.payload.appId && val.payload.appId != "") {
       await this.states.updateAppId(val);
     }
@@ -610,7 +624,7 @@ class TVHandler extends import_node_events.EventEmitter {
       this.isConnected = false;
       this.isRegistered = false;
       void this.startWatching();
-      this.adapter.log.info(`Devices ${this.ip} likely offline. Start MDNS monitoring.`);
+      this.adapter.log.debug(`Devices ${this.ip} likely offline. Start MDNS monitoring.`);
     } else if (val.payload.changed) {
       await this.states.updateOutputOld(val);
     }
@@ -814,14 +828,18 @@ class TVHandler extends import_node_events.EventEmitter {
     this.v4.clear();
     this.closeWS = "";
     await this.sleep(3e3);
-    this.startMulticast();
+    this.startWebSocketDelay && this.adapter.clearTimeout(this.startWebSocketDelay);
+    this.startWebSocketDelay = void 0;
+    if (this.ip && this.discovery == "ssdp") {
+      this.discover.discovery(this.ip);
+    } else {
+      this.startMulticast();
+    }
   }
   /**
    * Start MDNS Service
    */
   startMulticast() {
-    this.startWebSocketDelay && this.adapter.clearTimeout(this.startWebSocketDelay);
-    this.startWebSocketDelay = void 0;
     if (!this.mdn) {
       this.mdn = (0, import_multicast_dns.default)();
       this.mdn.query({
@@ -863,6 +881,25 @@ class TVHandler extends import_node_events.EventEmitter {
           this.delayStartWebSocket();
         }
       });
+    }
+  }
+  /**
+   * Discovery Events
+   *
+   * @param type - Update type
+   */
+  async getUpdateDiscovery(type) {
+    this.adapter.log.debug(type);
+    if (type == "found") {
+      this.adapter.log.debug(`Found device ${this.ip}`);
+      this.discover.destroy();
+      this.delayStartWebSocket();
+    } else if (type == "socket" || type == "sendError" || type == "error") {
+      if (this.ip) {
+        this.discover.destroy();
+        await this.sleep(3e3);
+        this.discover.discovery(this.ip);
+      }
     }
   }
   /**
@@ -1321,7 +1358,7 @@ class TVHandler extends import_node_events.EventEmitter {
           payload
         })
       );
-      this.adapter.setTimeout(() => {
+      this.promiseTimeout = this.adapter.setTimeout(() => {
         var _a2;
         (_a2 = this.ws) == null ? void 0 : _a2.removeEventListener("message", listener);
         this.v4.delete(id);
@@ -1363,7 +1400,7 @@ class TVHandler extends import_node_events.EventEmitter {
       };
       (_a = this.ws) == null ? void 0 : _a.addEventListener("message", listener);
       (_b = this.ws) == null ? void 0 : _b.send(JSON.stringify(payload));
-      this.adapter.setTimeout(() => {
+      this.promiseDirectTimeout = this.adapter.setTimeout(() => {
         var _a2;
         (_a2 = this.ws) == null ? void 0 : _a2.removeEventListener("message", listener);
         reject;
@@ -1498,6 +1535,8 @@ class TVHandler extends import_node_events.EventEmitter {
     this.checkTVStatus && this.adapter.clearInterval(this.checkTVStatus);
     this.startWebSocketDelay && this.adapter.clearTimeout(this.startWebSocketDelay);
     this.isStatusTimeout && this.adapter.clearTimeout(this.isStatusTimeout);
+    this.promiseTimeout && this.adapter.clearTimeout(this.promiseTimeout);
+    this.promiseDirectTimeout && this.adapter.clearTimeout(this.promiseDirectTimeout);
     await this.adapter.setState(`${this.dp}.status.online`, { val: false, ack: true });
     await this.adapter.setState(`${this.dp}.status.powerState`, { val: "unknown", ack: true });
     await this.updatePointerStatus(false);

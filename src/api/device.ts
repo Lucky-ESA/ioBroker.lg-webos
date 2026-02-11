@@ -7,6 +7,7 @@ import type { ConfigDevice, Device, pointerJson, respCheck } from "../types/devi
 import type { handshake } from "../types/handshake";
 import type { AxiosResponse } from "../types/object";
 import type { LGResponse } from "../types/response";
+import { lgtv_discovery } from "./discovery";
 import { handshake_notpaired, handshake_paired } from "./handshake";
 import { Endpoint, forbidden_ip, promisedWol, promisedWolAddress, webSocketClass } from "./helper";
 import { creatObjects } from "./objects";
@@ -45,15 +46,18 @@ export class TVHandler extends EventEmitter implements Device {
     private checkTVStatus: ioBroker.Interval | undefined;
     private startWebSocketDelay: ioBroker.Timeout | undefined;
     private isStatusTimeout: ioBroker.Timeout | undefined;
+    private promiseTimeout: ioBroker.Timeout | undefined;
+    private promiseDirectTimeout: ioBroker.Timeout | undefined;
     private log: boolean;
     private pair: handshake;
     private getRequest: axoisRrequest;
     private socketPath: string;
     private openPointerRequest: pointerJson;
     private isSettings: string[] = [];
-    private isStart: boolean = false;
     private closeWS: string = "";
     private isStatus: boolean;
+    private discover: lgtv_discovery;
+    private discovery: string;
 
     /**
      * Device
@@ -78,6 +82,7 @@ export class TVHandler extends EventEmitter implements Device {
         this.dp = device.dp;
         this.mac = device.mac;
         this.interval = device.interval;
+        this.discovery = device.discover;
         this.luna = device.luna;
         this.key = null;
         this.isConnected = false;
@@ -94,6 +99,8 @@ export class TVHandler extends EventEmitter implements Device {
         this.checkTVStatus = undefined;
         this.pointerCheck = undefined;
         this.startWebSocketDelay = undefined;
+        this.promiseDirectTimeout = undefined;
+        this.promiseTimeout = undefined;
         this.objects = new creatObjects(device, iob);
         this.states = new updateStates(device, iob);
         this.log = false;
@@ -109,6 +116,8 @@ export class TVHandler extends EventEmitter implements Device {
             prefix: undefined,
         };
         void this.onReady();
+        this.discover = new lgtv_discovery(iob);
+        this.discover.on("update", this.getUpdateDiscovery.bind(this));
     }
 
     /**
@@ -149,7 +158,6 @@ export class TVHandler extends EventEmitter implements Device {
             try {
                 const allStarts: any = JSON.parse(respStart.val);
                 if (typeof allStarts === "object" && allStarts.length > 0) {
-                    this.isStart = true;
                     for (const allStar of allStarts) {
                         this.reqResp.push([
                             allStar[0].toString(),
@@ -188,6 +196,10 @@ export class TVHandler extends EventEmitter implements Device {
             this.isConnected = true;
             this.adapter.log.debug(`LGTV message for ${this.uri}`);
             if (message && message.data) {
+                if (!this.isStatus || this.isStatusTimeout) {
+                    this.isStatus = false;
+                    void this.updateStatus(true);
+                }
                 this.adapter.log.debug(`Message: ${JSON.stringify(message.data)}`);
                 try {
                     const payload = JSON.parse(message.data);
@@ -527,6 +539,7 @@ export class TVHandler extends EventEmitter implements Device {
         const settings = [];
         for (const r of this.reqResp) {
             if (
+                r[1].response != "response" &&
                 r[1].settings != "No Value" &&
                 r[1].settings != "" &&
                 r[1].category == "picture" &&
@@ -582,6 +595,8 @@ export class TVHandler extends EventEmitter implements Device {
             await this.states.updateChannel(val);
         } else if (val.payload.channelTypeName) {
             await this.states.updateChannelSwitch(val);
+        } else if (val.payload.programId) {
+            await this.states.updateProgram(val);
         } else if (val.payload.appId && val.payload.appId != "") {
             await this.states.updateAppId(val);
         }
@@ -636,7 +651,7 @@ export class TVHandler extends EventEmitter implements Device {
             this.isConnected = false;
             this.isRegistered = false;
             void this.startWatching();
-            this.adapter.log.info(`Devices ${this.ip} likely offline. Start MDNS monitoring.`);
+            this.adapter.log.debug(`Devices ${this.ip} likely offline. Start MDNS monitoring.`);
         } else if (val.payload.changed) {
             await this.states.updateOutputOld(val);
         }
@@ -872,15 +887,19 @@ export class TVHandler extends EventEmitter implements Device {
         this.v4.clear();
         this.closeWS = "";
         await this.sleep(3000);
-        this.startMulticast();
+        this.startWebSocketDelay && this.adapter.clearTimeout(this.startWebSocketDelay);
+        this.startWebSocketDelay = undefined;
+        if (this.ip && this.discovery == "ssdp") {
+            this.discover.discovery(this.ip);
+        } else {
+            this.startMulticast();
+        }
     }
 
     /**
      * Start MDNS Service
      */
     private startMulticast(): void {
-        this.startWebSocketDelay && this.adapter.clearTimeout(this.startWebSocketDelay);
-        this.startWebSocketDelay = undefined;
         if (!this.mdn) {
             this.mdn = mdns();
             this.mdn.query({
@@ -921,6 +940,26 @@ export class TVHandler extends EventEmitter implements Device {
                     this.delayStartWebSocket();
                 }
             });
+        }
+    }
+
+    /**
+     * Discovery Events
+     *
+     * @param type - Update type
+     */
+    private async getUpdateDiscovery(type: string): Promise<void> {
+        this.adapter.log.debug(type);
+        if (type == "found") {
+            this.adapter.log.debug(`Found device ${this.ip}`);
+            this.discover.destroy();
+            this.delayStartWebSocket();
+        } else if (type == "socket" || type == "sendError" || type == "error") {
+            if (this.ip) {
+                this.discover.destroy();
+                await this.sleep(3000);
+                this.discover.discovery(this.ip);
+            }
         }
     }
 
@@ -1410,7 +1449,7 @@ export class TVHandler extends EventEmitter implements Device {
                     payload,
                 }),
             );
-            this.adapter.setTimeout(() => {
+            this.promiseTimeout = this.adapter.setTimeout(() => {
                 this.ws?.removeEventListener("message", listener);
                 this.v4.delete(id);
                 reject;
@@ -1450,7 +1489,7 @@ export class TVHandler extends EventEmitter implements Device {
             };
             this.ws?.addEventListener("message", listener);
             this.ws?.send(JSON.stringify(payload));
-            this.adapter.setTimeout(() => {
+            this.promiseDirectTimeout = this.adapter.setTimeout(() => {
                 this.ws?.removeEventListener("message", listener);
                 reject;
             }, 1000 * 5);
@@ -1597,6 +1636,8 @@ export class TVHandler extends EventEmitter implements Device {
         this.checkTVStatus && this.adapter.clearInterval(this.checkTVStatus);
         this.startWebSocketDelay && this.adapter.clearTimeout(this.startWebSocketDelay);
         this.isStatusTimeout && this.adapter.clearTimeout(this.isStatusTimeout);
+        this.promiseTimeout && this.adapter.clearTimeout(this.promiseTimeout);
+        this.promiseDirectTimeout && this.adapter.clearTimeout(this.promiseDirectTimeout);
         await this.adapter.setState(`${this.dp}.status.online`, { val: false, ack: true });
         await this.adapter.setState(`${this.dp}.status.powerState`, { val: "unknown", ack: true });
         await this.updatePointerStatus(false);
