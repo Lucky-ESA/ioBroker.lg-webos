@@ -88,7 +88,7 @@ class creatObjects {
         "state",
         null,
         null,
-        null
+        val
       );
     }
   }
@@ -1365,6 +1365,41 @@ class creatObjects {
         null,
         null
       );
+      const product = val.payload.product_name.split(" ");
+      if (typeof product === "object" && product[1]) {
+        const webos = Number(product[1]);
+        if (webos >= 23) {
+          common = {
+            type: "boolean",
+            role: "switch",
+            name: {
+              en: "Enable full Service Menu",
+              de: "Vollst\xE4ndiges Servicemen\xFC aktivieren",
+              ru: "\u0412\u043A\u043B\u044E\u0447\u0438\u0442\u044C \u043F\u043E\u043B\u043D\u043E\u0435 \u043C\u0435\u043D\u044E \u043E\u0431\u0441\u043B\u0443\u0436\u0438\u0432\u0430\u043D\u0438\u044F",
+              pt: "Ativar menu de servi\xE7o completo",
+              nl: "Het volledige servicemenu inschakelen",
+              fr: "Activer le menu complet",
+              it: "Abilita il menu completo dei servizi",
+              es: "Habilitar el men\xFA de servicio completo",
+              pl: "W\u0142\u0105cz pe\u0142ne menu serwisowe",
+              uk: "\u0423\u0432\u0456\u043C\u043A\u043D\u0443\u0442\u0438 \u043F\u043E\u0432\u043D\u0435 \u043C\u0435\u043D\u044E \u043F\u043E\u0441\u043B\u0443\u0433",
+              "zh-cn": "\u542F\u7528\u5B8C\u6574\u670D\u52A1\u83DC\u5355"
+            },
+            desc: "Create by Adapter",
+            read: true,
+            write: true,
+            def: true
+          };
+          await this.createDataPoint(
+            `${this.dev.dp}.remote.settings.svcMenuFlag`,
+            common,
+            "state",
+            null,
+            null,
+            null
+          );
+        }
+      }
       common = {
         type: "string",
         role: "state",
@@ -3739,7 +3774,7 @@ class creatObjects {
    * @param extend Use extend or setObject
    * @param native Object Nativ
    */
-  async createDataPoint(ident, common, types, value, extend, native = null) {
+  async createDataPoint(ident, common, types, value, extend, native) {
     try {
       const nativvalue = !native ? { native: {} } : { native };
       const obj = await this.adapter.getObjectAsync(ident);
@@ -3800,6 +3835,7 @@ class creatObjects {
             }
           } else {
             ischange = true;
+            obj.native = nativvalue.native;
           }
         }
         if (ischange) {

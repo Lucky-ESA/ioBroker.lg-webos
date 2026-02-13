@@ -937,18 +937,18 @@ class TVHandler extends import_node_events.EventEmitter {
   async wol(id) {
     if (this.ip && this.mac) {
       const val = await (0, import_helper.promisedWol)(this.mac);
-      if (val) {
+      if (val == "OK") {
         await this.adapter.setState(id, { ack: true });
         this.adapter.log.info(`Send wol: ${this.mac} - ${this.ip}`);
       } else {
-        this.adapter.log.info(`Send wol error: ${val}`);
+        this.adapter.log.info(`Send wol error: ${val.toString()}`);
       }
       const address = await (0, import_helper.promisedWolAddress)(this.mac, this.ip);
-      if (address) {
+      if (address == "OK") {
         await this.adapter.setState(id, { ack: true });
         this.adapter.log.info(`Send wol address: ${this.mac} - ${this.ip}`);
       } else {
-        this.adapter.log.info(`Send wol address error: ${address}`);
+        this.adapter.log.info(`Send wol address error: ${address.toString()}`);
       }
     }
   }
@@ -1473,6 +1473,7 @@ class TVHandler extends import_node_events.EventEmitter {
    * Destroy all events
    */
   async destroy() {
+    this.discover.destroy();
     if (this.mdn != null) {
       this.mdn.destroy();
       this.mdn = null;

@@ -338,7 +338,7 @@ class updateStates {
       for (const attribute in val.payload.settings) {
         if (this.objectId[`${this.adapter.namespace}.remote.settings.${attribute}`]) {
           const type = this.objectId[`${this.adapter.namespace}.remote.settings.${attribute}`];
-          const x = val.payload.settings[attribute];
+          const x = typeof val.payload.settings[attribute] === "object" ? JSON.stringify(val.payload.settings[attribute]) : val.payload.settings[attribute];
           let value;
           if (type == "number") {
             value = Number(x);

@@ -85,7 +85,7 @@ export class creatObjects implements Objects {
                 "state",
                 null,
                 null,
-                null,
+                val,
             );
         }
     }
@@ -1366,6 +1366,41 @@ export class creatObjects implements Objects {
                 null,
                 null,
             );
+            const product = val.payload.product_name.split(" ");
+            if (typeof product === "object" && product[1]) {
+                const webos = Number(product[1]);
+                if (webos >= 23) {
+                    common = {
+                        type: "boolean",
+                        role: "switch",
+                        name: {
+                            en: "Enable full Service Menu",
+                            de: "Vollständiges Servicemenü aktivieren",
+                            ru: "Включить полное меню обслуживания",
+                            pt: "Ativar menu de serviço completo",
+                            nl: "Het volledige servicemenu inschakelen",
+                            fr: "Activer le menu complet",
+                            it: "Abilita il menu completo dei servizi",
+                            es: "Habilitar el menú de servicio completo",
+                            pl: "Włącz pełne menu serwisowe",
+                            uk: "Увімкнути повне меню послуг",
+                            "zh-cn": "启用完整服务菜单",
+                        },
+                        desc: "Create by Adapter",
+                        read: true,
+                        write: true,
+                        def: true,
+                    };
+                    await this.createDataPoint(
+                        `${this.dev.dp}.remote.settings.svcMenuFlag`,
+                        common,
+                        "state",
+                        null,
+                        null,
+                        null,
+                    );
+                }
+            }
             common = {
                 type: "string",
                 role: "state",
@@ -3769,10 +3804,10 @@ export class creatObjects implements Objects {
         types: "state" | "folder" | "channel" | "device",
         value: string | number | boolean | null | undefined,
         extend: boolean | null | undefined,
-        native = null,
+        native: any,
     ): Promise<void> {
         try {
-            const nativvalue: any = !native ? { native: {} } : { native: native };
+            const nativvalue = !native ? { native: {} } : { native: native };
             const obj: any = await this.adapter.getObjectAsync(ident);
             if (!obj) {
                 await this.adapter
@@ -3833,6 +3868,7 @@ export class creatObjects implements Objects {
                         }
                     } else {
                         ischange = true;
+                        obj.native = nativvalue.native;
                     }
                 }
                 if (ischange) {

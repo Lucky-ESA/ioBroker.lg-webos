@@ -137,7 +137,7 @@ class LgWebos extends utils.Adapter {
    * @param state - State object
    */
   onStateChange(id, state) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _A, _B, _C, _D, _E, _F, _G, _H, _I, _J, _K, _L, _M, _N, _O, _P, _Q, _R, _S, _T, _U, _V, _W, _X;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _A, _B, _C, _D, _E, _F, _G, _H, _I, _J, _K, _L, _M, _N, _O, _P, _Q, _R, _S;
     if (state && !state.ack) {
       const idParts = id.split(".");
       const command = idParts.pop();
@@ -151,6 +151,40 @@ class LgWebos extends utils.Adapter {
       let level = {};
       let system = import_helper.Endpoint.LUNA_SET_SYSTEM_SETTINGS;
       let method = "luna://";
+      if (id.indexOf(".remote.settings.") !== -1) {
+        if (this.picture.get(deviceId)) {
+          system = import_helper.Endpoint.SET_SYSTEM_SETTINGS;
+          method = "ssap://";
+        }
+        if (command == "svcMenuFlag") {
+          (_a = this.devices.get(deviceId)) == null ? void 0 : _a.request(
+            id,
+            "request",
+            system,
+            {
+              category: "other",
+              settings: { svcMenuFlag: state.val }
+            },
+            method
+          );
+        } else if (command != void 0) {
+          if (typeof state.val === "string" && state.val.startsWith("{")) {
+            try {
+              state.val = JSON.parse(state.val);
+            } catch (error) {
+              if (typeof error === "string") {
+                this.log.error(error);
+              } else if (error instanceof Error) {
+                this.log.error(`${error.name}: ${error.message}`);
+              }
+              return;
+            }
+          }
+          settings[command] = typeof state.val === "number" ? (_b = state.val) == null ? void 0 : _b.toString() : state.val;
+          void this.systemSettings(id, deviceId, settings, system, method);
+        }
+        return;
+      }
       switch (command) {
         case "rewind":
         case "fastForward":
@@ -172,7 +206,7 @@ class LgWebos extends utils.Adapter {
         case "left":
         case "right":
         case "down":
-          (_a = this.devices.get(deviceId)) == null ? void 0 : _a.request(id, "pointer", import_helper.Endpoint.SET_BUTTON, { name: command.toString().toUpperCase() }, "");
+          (_c = this.devices.get(deviceId)) == null ? void 0 : _c.request(id, "pointer", import_helper.Endpoint.SET_BUTTON, { name: command.toString().toUpperCase() }, "");
           break;
         case "digit0":
         case "digit1":
@@ -185,106 +219,106 @@ class LgWebos extends utils.Adapter {
         case "digit8":
         case "digit9":
           digit = command.charAt(command.length - 1);
-          (_b = this.devices.get(deviceId)) == null ? void 0 : _b.request(id, "pointer", import_helper.Endpoint.SET_BUTTON, { name: digit }, "");
+          (_d = this.devices.get(deviceId)) == null ? void 0 : _d.request(id, "pointer", import_helper.Endpoint.SET_BUTTON, { name: digit }, "");
           break;
         case "enter":
-          (_c = this.devices.get(deviceId)) == null ? void 0 : _c.request(id, "request", import_helper.Endpoint.SEND_ENTER);
+          (_e = this.devices.get(deviceId)) == null ? void 0 : _e.request(id, "request", import_helper.Endpoint.SEND_ENTER);
           break;
         case "mute":
-          (_d = this.devices.get(deviceId)) == null ? void 0 : _d.request(id, "request", import_helper.Endpoint.SET_MUTE, { mute: state.val ? true : false });
+          (_f = this.devices.get(deviceId)) == null ? void 0 : _f.request(id, "request", import_helper.Endpoint.SET_MUTE, { mute: state.val ? true : false });
           break;
         case "channelDown":
-          (_e = this.devices.get(deviceId)) == null ? void 0 : _e.request(id, "request", import_helper.Endpoint.TV_CHANNEL_DOWN);
+          (_g = this.devices.get(deviceId)) == null ? void 0 : _g.request(id, "request", import_helper.Endpoint.TV_CHANNEL_DOWN);
           break;
         case "channelUp":
-          (_f = this.devices.get(deviceId)) == null ? void 0 : _f.request(id, "request", import_helper.Endpoint.TV_CHANNEL_UP);
+          (_h = this.devices.get(deviceId)) == null ? void 0 : _h.request(id, "request", import_helper.Endpoint.TV_CHANNEL_UP);
           break;
         case "volumeUp":
-          (_g = this.devices.get(deviceId)) == null ? void 0 : _g.request(id, "request", import_helper.Endpoint.VOLUME_UP);
+          (_i = this.devices.get(deviceId)) == null ? void 0 : _i.request(id, "request", import_helper.Endpoint.VOLUME_UP);
           break;
         case "volumeDown":
-          (_h = this.devices.get(deviceId)) == null ? void 0 : _h.request(id, "request", import_helper.Endpoint.VOLUME_DOWN);
+          (_j = this.devices.get(deviceId)) == null ? void 0 : _j.request(id, "request", import_helper.Endpoint.VOLUME_DOWN);
           break;
         case "rtlPlus":
           if (typeof state.val === "string" && state.val != null && state.val != "unknown") {
-            (_i = this.devices.get(deviceId)) == null ? void 0 : _i.request(id, "request", import_helper.Endpoint.LAUNCH, {
+            (_k = this.devices.get(deviceId)) == null ? void 0 : _k.request(id, "request", import_helper.Endpoint.LAUNCH, {
               id: "com.netrtl.tvnow"
             });
           }
           break;
         case "disneyPlus":
           if (typeof state.val === "string" && state.val != null && state.val != "unknown") {
-            (_j = this.devices.get(deviceId)) == null ? void 0 : _j.request(id, "request", import_helper.Endpoint.LAUNCH, {
+            (_l = this.devices.get(deviceId)) == null ? void 0 : _l.request(id, "request", import_helper.Endpoint.LAUNCH, {
               id: "com.disney.disneyplus-prod"
             });
           }
           break;
         case "youtube":
           if (typeof state.val === "string" && state.val != null && state.val != "unknown") {
-            (_k = this.devices.get(deviceId)) == null ? void 0 : _k.request(id, "request", import_helper.Endpoint.LAUNCH, {
+            (_m = this.devices.get(deviceId)) == null ? void 0 : _m.request(id, "request", import_helper.Endpoint.LAUNCH, {
               id: "youtube.leanback.v4"
             });
           }
           break;
         case "appletv":
           if (typeof state.val === "string" && state.val != null && state.val != "unknown") {
-            (_l = this.devices.get(deviceId)) == null ? void 0 : _l.request(id, "request", import_helper.Endpoint.LAUNCH, {
+            (_n = this.devices.get(deviceId)) == null ? void 0 : _n.request(id, "request", import_helper.Endpoint.LAUNCH, {
               id: "com.apple.appletv"
             });
           }
           break;
         case "netflix":
           if (typeof state.val === "string" && state.val != null && state.val != "unknown") {
-            (_m = this.devices.get(deviceId)) == null ? void 0 : _m.request(id, "request", import_helper.Endpoint.LAUNCH, {
+            (_o = this.devices.get(deviceId)) == null ? void 0 : _o.request(id, "request", import_helper.Endpoint.LAUNCH, {
               id: "netflix"
             });
           }
           break;
         case "amazon":
           if (typeof state.val === "string" && state.val != null && state.val != "unknown") {
-            (_n = this.devices.get(deviceId)) == null ? void 0 : _n.request(id, "request", import_helper.Endpoint.LAUNCH, {
+            (_p = this.devices.get(deviceId)) == null ? void 0 : _p.request(id, "request", import_helper.Endpoint.LAUNCH, {
               id: "amazon"
             });
           }
           break;
         case "amazonAlexa":
           if (typeof state.val === "string" && state.val != null && state.val != "unknown") {
-            (_o = this.devices.get(deviceId)) == null ? void 0 : _o.request(id, "request", import_helper.Endpoint.LAUNCH, {
+            (_q = this.devices.get(deviceId)) == null ? void 0 : _q.request(id, "request", import_helper.Endpoint.LAUNCH, {
               id: "amazon.alexa.view"
             });
           }
           break;
         case "joyn":
           if (typeof state.val === "string" && state.val != null && state.val != "unknown") {
-            (_p = this.devices.get(deviceId)) == null ? void 0 : _p.request(id, "request", import_helper.Endpoint.LAUNCH, {
+            (_r = this.devices.get(deviceId)) == null ? void 0 : _r.request(id, "request", import_helper.Endpoint.LAUNCH, {
               id: "joyn"
             });
           }
           break;
         case "openURL":
           if (typeof state.val === "string" && state.val != null && state.val != "") {
-            (_q = this.devices.get(deviceId)) == null ? void 0 : _q.request(id, "request", import_helper.Endpoint.OPEN, {
+            (_s = this.devices.get(deviceId)) == null ? void 0 : _s.request(id, "request", import_helper.Endpoint.OPEN, {
               target: state.val
             });
           }
           break;
         case "3Dmode":
           if (state.val) {
-            (_r = this.devices.get(deviceId)) == null ? void 0 : _r.request(id, "request", import_helper.Endpoint.SET_3D_ON);
+            (_t = this.devices.get(deviceId)) == null ? void 0 : _t.request(id, "request", import_helper.Endpoint.SET_3D_ON);
           } else {
-            (_s = this.devices.get(deviceId)) == null ? void 0 : _s.request(id, "request", import_helper.Endpoint.SET_3D_OFF);
+            (_u = this.devices.get(deviceId)) == null ? void 0 : _u.request(id, "request", import_helper.Endpoint.SET_3D_OFF);
           }
           break;
         case "channel":
           if (typeof state.val === "number" && state.val != null) {
-            (_t = this.devices.get(deviceId)) == null ? void 0 : _t.request(id, "request", import_helper.Endpoint.SET_CHANNEL, {
+            (_v = this.devices.get(deviceId)) == null ? void 0 : _v.request(id, "request", import_helper.Endpoint.SET_CHANNEL, {
               channelNumber: state.val.toString()
             });
           }
           break;
         case "channelId":
           if (typeof state.val === "string" && state.val != null) {
-            (_u = this.devices.get(deviceId)) == null ? void 0 : _u.request(id, "request", import_helper.Endpoint.SET_CHANNEL, {
+            (_w = this.devices.get(deviceId)) == null ? void 0 : _w.request(id, "request", import_helper.Endpoint.SET_CHANNEL, {
               channelId: state.val
             });
           }
@@ -292,63 +326,63 @@ class LgWebos extends utils.Adapter {
         case "input":
         case "launch":
           if (typeof state.val === "string" && state.val != null && state.val != "unknown") {
-            (_v = this.devices.get(deviceId)) == null ? void 0 : _v.request(id, "request", import_helper.Endpoint.LAUNCH, {
+            (_x = this.devices.get(deviceId)) == null ? void 0 : _x.request(id, "request", import_helper.Endpoint.LAUNCH, {
               id: state.val
             });
           }
           break;
         case "soundOutput":
-          (_w = this.devices.get(deviceId)) == null ? void 0 : _w.request(id, "request", import_helper.Endpoint.CHANGE_SOUND_OUTPUT, { output: state.val });
+          (_y = this.devices.get(deviceId)) == null ? void 0 : _y.request(id, "request", import_helper.Endpoint.CHANGE_SOUND_OUTPUT, { output: state.val });
           break;
         case "volume":
           if (typeof state.val === "number" && state.val != null && state.val >= 0 && state.val <= 100) {
-            (_x = this.devices.get(deviceId)) == null ? void 0 : _x.request(id, "request", import_helper.Endpoint.SET_VOLUME, { volume: state.val });
+            (_z = this.devices.get(deviceId)) == null ? void 0 : _z.request(id, "request", import_helper.Endpoint.SET_VOLUME, { volume: state.val });
           }
           break;
         case "powerOff":
-          (_y = this.devices.get(deviceId)) == null ? void 0 : _y.request(id, "request", import_helper.Endpoint.POWER_OFF);
+          (_A = this.devices.get(deviceId)) == null ? void 0 : _A.request(id, "request", import_helper.Endpoint.POWER_OFF);
           break;
         case "powerOn":
-          void ((_z = this.devices.get(deviceId)) == null ? void 0 : _z.wol(id));
+          void ((_B = this.devices.get(deviceId)) == null ? void 0 : _B.wol(id));
           break;
         case "screenOff":
           level = import_helper.Endpoint.TURN_OFF_SCREEN;
           if (this.oldDevice.get(deviceId)) {
             level = import_helper.Endpoint.TURN_OFF_SCREEN_OD;
           }
-          (_A = this.devices.get(deviceId)) == null ? void 0 : _A.request(id, "request", level, { standbyMode: "active" });
+          (_C = this.devices.get(deviceId)) == null ? void 0 : _C.request(id, "request", level, { standbyMode: "active" });
           break;
         case "screenOn":
           level = import_helper.Endpoint.TURN_ON_SCREEN;
           if (this.oldDevice.get(deviceId)) {
             level = import_helper.Endpoint.TURN_ON_SCREEN_OD;
           }
-          (_B = this.devices.get(deviceId)) == null ? void 0 : _B.request(id, "request", level, { standbyMode: "active" });
+          (_D = this.devices.get(deviceId)) == null ? void 0 : _D.request(id, "request", level, { standbyMode: "active" });
           break;
         case "closeAlert":
           if (state.val != null && state.val != "no") {
-            void ((_C = this.devices.get(deviceId)) == null ? void 0 : _C.MessageHandler(id, "closeAlert", import_helper.Endpoint.CLOSE_ALERT, { alertId: state.val }));
+            void ((_E = this.devices.get(deviceId)) == null ? void 0 : _E.MessageHandler(id, "closeAlert", import_helper.Endpoint.CLOSE_ALERT, { alertId: state.val }));
           }
           break;
         case "createAlert":
-          void ((_D = this.devices.get(deviceId)) == null ? void 0 : _D.MessageHandler(id, "createAlert", import_helper.Endpoint.CREATE_ALERT, {
+          void ((_F = this.devices.get(deviceId)) == null ? void 0 : _F.MessageHandler(id, "createAlert", import_helper.Endpoint.CREATE_ALERT, {
             message: state.val,
             buttons: [{ label: "OK" }]
           }));
           break;
         case "closeToast":
           if (state.val != null && state.val != "no") {
-            void ((_E = this.devices.get(deviceId)) == null ? void 0 : _E.MessageHandler(id, "closeToast", import_helper.Endpoint.CLOSE_TOAST, { toastId: state.val }));
+            void ((_G = this.devices.get(deviceId)) == null ? void 0 : _G.MessageHandler(id, "closeToast", import_helper.Endpoint.CLOSE_TOAST, { toastId: state.val }));
           }
           break;
         case "createToast":
-          void ((_F = this.devices.get(deviceId)) == null ? void 0 : _F.MessageHandler(id, "createToast", import_helper.Endpoint.CREATE_TOAST, { message: state.val }));
+          void ((_H = this.devices.get(deviceId)) == null ? void 0 : _H.MessageHandler(id, "createToast", import_helper.Endpoint.CREATE_TOAST, { message: state.val }));
           break;
         case "request":
           this.own_request(deviceId, state);
           break;
         case "click":
-          (_G = this.devices.get(deviceId)) == null ? void 0 : _G.request(id, "pointer", import_helper.Endpoint.CURSOR_CLICK, null, "");
+          (_I = this.devices.get(deviceId)) == null ? void 0 : _I.request(id, "pointer", import_helper.Endpoint.CURSOR_CLICK, null, "");
           break;
         case "drag":
           if (state.val && ~state.val.toString().indexOf(",")) {
@@ -356,7 +390,7 @@ class LgWebos extends utils.Adapter {
             const dx = parseInt(vals[0]);
             const dy = parseInt(vals[1]);
             const drag = vals[2] == "drag" ? 1 : 0;
-            (_H = this.devices.get(deviceId)) == null ? void 0 : _H.request(
+            (_J = this.devices.get(deviceId)) == null ? void 0 : _J.request(
               id,
               "pointer",
               import_helper.Endpoint.CURSOR_DRAG,
@@ -374,163 +408,36 @@ class LgWebos extends utils.Adapter {
             const vals = state.val.toString().split(",");
             const dx = parseInt(vals[0]);
             const dy = parseInt(vals[1]);
-            (_I = this.devices.get(deviceId)) == null ? void 0 : _I.request(id, "pointer", import_helper.Endpoint.CURSOR_SCROLL, { dx, dy }, "");
+            (_K = this.devices.get(deviceId)) == null ? void 0 : _K.request(id, "pointer", import_helper.Endpoint.CURSOR_SCROLL, { dx, dy }, "");
           }
           break;
         case "mdnLog":
           if (state.val != null && typeof state.val === "boolean") {
-            (_J = this.devices.get(deviceId)) == null ? void 0 : _J.mdnLog(state.val);
+            (_L = this.devices.get(deviceId)) == null ? void 0 : _L.mdnLog(state.val);
           }
           break;
         case "deleteText":
-          (_K = this.devices.get(deviceId)) == null ? void 0 : _K.request(id, "request", import_helper.Endpoint.SEND_DELETE);
+          (_M = this.devices.get(deviceId)) == null ? void 0 : _M.request(id, "request", import_helper.Endpoint.SEND_DELETE);
           break;
         case "insertText":
           if (state.val != null && typeof state.val === "string") {
-            (_L = this.devices.get(deviceId)) == null ? void 0 : _L.request(id, "request", import_helper.Endpoint.INSERT_TEXT, { text: state.val });
+            (_N = this.devices.get(deviceId)) == null ? void 0 : _N.request(id, "request", import_helper.Endpoint.INSERT_TEXT, { text: state.val });
           }
           break;
         case "closeLaunch":
-          (_M = this.devices.get(deviceId)) == null ? void 0 : _M.request(id, "request", import_helper.Endpoint.LAUNCHER_CLOSE);
+          (_O = this.devices.get(deviceId)) == null ? void 0 : _O.request(id, "request", import_helper.Endpoint.LAUNCHER_CLOSE);
           break;
         case "screenshot":
-          (_N = this.devices.get(deviceId)) == null ? void 0 : _N.request(id, "request", import_helper.Endpoint.TAKE_SCREENSHOT);
+          (_P = this.devices.get(deviceId)) == null ? void 0 : _P.request(id, "request", import_helper.Endpoint.TAKE_SCREENSHOT);
           break;
         case "closeWebApp":
-          (_O = this.devices.get(deviceId)) == null ? void 0 : _O.request(id, "request", import_helper.Endpoint.CLOSE_WEB_APP);
+          (_Q = this.devices.get(deviceId)) == null ? void 0 : _Q.request(id, "request", import_helper.Endpoint.CLOSE_WEB_APP);
           break;
         case "screenSaver":
-          (_P = this.devices.get(deviceId)) == null ? void 0 : _P.request(id, "request", import_helper.Endpoint.LUNA_TURN_ON_SCREEN_SAVER, {}, "luna://");
+          (_R = this.devices.get(deviceId)) == null ? void 0 : _R.request(id, "request", import_helper.Endpoint.LUNA_TURN_ON_SCREEN_SAVER, {}, "luna://");
           break;
         case "showInputPicker":
-          (_Q = this.devices.get(deviceId)) == null ? void 0 : _Q.request(id, "request", import_helper.Endpoint.LUNA_SHOW_INPUT_PICKER, null, "luna://");
-          break;
-        case "brightness":
-        case "backlight":
-        case "contrast":
-        case "color":
-        case "sharpness":
-        case "tint":
-          settings[command] = (_R = state.val) == null ? void 0 : _R.toString();
-          if (this.picture.get(deviceId)) {
-            system = import_helper.Endpoint.SET_SYSTEM_SETTINGS;
-            method = "ssap://";
-          }
-          (_S = this.devices.get(deviceId)) == null ? void 0 : _S.request(
-            id,
-            "request",
-            system,
-            {
-              category: "picture",
-              settings
-            },
-            method
-          );
-          break;
-        case "pictureMode":
-        case "energySaving":
-        case "dynamicContrast":
-        case "peakBrightness":
-        case "gamma":
-        case "colorGamut":
-        case "hdrDynamicToneMapping":
-        case "noiseReduction":
-        case "dynamicColor":
-        case "smoothGradation":
-        case "mpegNoiseReduction":
-          settings[command] = state.val;
-          if (this.picture.get(deviceId)) {
-            system = import_helper.Endpoint.SET_SYSTEM_SETTINGS;
-            method = "ssap://";
-          }
-          (_T = this.devices.get(deviceId)) == null ? void 0 : _T.request(
-            id,
-            "request",
-            system,
-            {
-              category: "picture",
-              settings
-            },
-            method
-          );
-          break;
-        case "motionEyeCare":
-        case "realCinema":
-        case "eyeComfortMode":
-          settings[command] = state.val ? "on" : "off";
-          if (this.picture.get(deviceId)) {
-            system = import_helper.Endpoint.SET_SYSTEM_SETTINGS;
-            method = "ssap://";
-          }
-          (_U = this.devices.get(deviceId)) == null ? void 0 : _U.request(
-            id,
-            "request",
-            system,
-            {
-              category: "picture",
-              settings
-            },
-            method
-          );
-          break;
-        case "blackLevel":
-          if (typeof state.val === "string" && state.val.startsWith("{")) {
-            try {
-              level = JSON.parse(state.val);
-              if (this.picture.get(deviceId)) {
-                system = import_helper.Endpoint.SET_SYSTEM_SETTINGS;
-                method = "ssap://";
-              }
-              (_V = this.devices.get(deviceId)) == null ? void 0 : _V.request(
-                id,
-                "request",
-                system,
-                {
-                  category: "picture",
-                  settings: { blackLevel: level }
-                },
-                method
-              );
-            } catch (error) {
-              if (typeof error === "string") {
-                this.log.error(error);
-              } else if (error instanceof Error) {
-                this.log.error(`${error.name}: ${error.message}`);
-              }
-            }
-          }
-          break;
-        case "deviceName":
-          if (this.picture.get(deviceId)) {
-            system = import_helper.Endpoint.SET_SYSTEM_SETTINGS;
-            method = "ssap://";
-          }
-          (_W = this.devices.get(deviceId)) == null ? void 0 : _W.request(
-            id,
-            "request",
-            system,
-            {
-              category: "network",
-              settings: { deviceName: state.val }
-            },
-            method
-          );
-          break;
-        case "wolwowlOnOff":
-          if (this.picture.get(deviceId)) {
-            system = import_helper.Endpoint.SET_SYSTEM_SETTINGS;
-            method = "ssap://";
-          }
-          (_X = this.devices.get(deviceId)) == null ? void 0 : _X.request(
-            id,
-            "request",
-            system,
-            {
-              category: "network",
-              settings: { wolwowlOnOff: state.val ? "true" : "false" }
-            },
-            method
-          );
+          (_S = this.devices.get(deviceId)) == null ? void 0 : _S.request(id, "request", import_helper.Endpoint.LUNA_SHOW_INPUT_PICKER, null, "luna://");
           break;
         default:
           this.log.warn(`Cannot found command ${command} from device ${deviceId}`);
@@ -540,7 +447,35 @@ class LgWebos extends utils.Adapter {
   /**
    * Own request
    *
-   * @param deviceId - State ID
+   * @param id - State ID
+   * @param deviceId - Object IP
+   * @param settings - State object
+   * @param system - Endpoint
+   * @param method - Methode
+   */
+  async systemSettings(id, deviceId, settings, system, method) {
+    var _a;
+    const obj = await this.getObjectAsync(id);
+    if (obj && obj.native && obj.native.category) {
+      (_a = this.devices.get(deviceId)) == null ? void 0 : _a.request(
+        id,
+        "request",
+        system,
+        {
+          category: obj.native.category,
+          settings
+        },
+        method
+      );
+      await this.setState(id, {
+        ack: true
+      });
+    }
+  }
+  /**
+   * Own request
+   *
+   * @param deviceId - Object IP
    * @param state - State object
    */
   own_request(deviceId, state) {

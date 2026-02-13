@@ -996,18 +996,18 @@ export class TVHandler extends EventEmitter implements Device {
     public async wol(id: string): Promise<void> {
         if (this.ip && this.mac) {
             const val = await promisedWol(this.mac);
-            if (val) {
+            if (val == "OK") {
                 await this.adapter.setState(id, { ack: true });
                 this.adapter.log.info(`Send wol: ${this.mac} - ${this.ip}`);
             } else {
-                this.adapter.log.info(`Send wol error: ${val}`);
+                this.adapter.log.info(`Send wol error: ${val.toString()}`);
             }
             const address = await promisedWolAddress(this.mac, this.ip);
-            if (address) {
+            if (address == "OK") {
                 await this.adapter.setState(id, { ack: true });
                 this.adapter.log.info(`Send wol address: ${this.mac} - ${this.ip}`);
             } else {
-                this.adapter.log.info(`Send wol address error: ${address}`);
+                this.adapter.log.info(`Send wol address error: ${address.toString()}`);
             }
         }
     }
@@ -1563,6 +1563,7 @@ export class TVHandler extends EventEmitter implements Device {
      * Destroy all events
      */
     public async destroy(): Promise<void> {
+        this.discover.destroy();
         if (this.mdn != null) {
             this.mdn.destroy();
             this.mdn = null;

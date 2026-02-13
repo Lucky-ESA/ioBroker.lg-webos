@@ -49,23 +49,23 @@ function webSocketClass(options) {
   };
 }
 function promisedWolAddress(macAddress, address) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     import_wake_on_lan.default.wake(macAddress, { address, port: 9 }, (error) => {
       if (error) {
-        reject;
+        resolve(error);
       } else {
-        resolve(true);
+        resolve("OK");
       }
     });
   });
 }
 function promisedWol(macAddress) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     import_wake_on_lan.default.wake(macAddress, (error) => {
       if (error) {
-        reject;
+        resolve(error);
       } else {
-        resolve(true);
+        resolve("OK");
       }
     });
   });

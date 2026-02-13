@@ -1,3 +1,4 @@
+import type { ErrorCallback } from "wake_on_lan";
 import wol from "wake_on_lan";
 import WebSocket from "ws";
 
@@ -25,13 +26,13 @@ export function webSocketClass(options: WebSocket.ClientOptions): any {
  * @param address IP Address
  * @returns result
  */
-export function promisedWolAddress(macAddress: string, address: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-        wol.wake(macAddress, { address, port: 9 }, (error: any) => {
+export function promisedWolAddress(macAddress: string, address: string): Promise<ErrorCallback | string> {
+    return new Promise(resolve => {
+        wol.wake(macAddress, { address, port: 9 }, (error: ErrorCallback) => {
             if (error) {
-                reject;
+                resolve(error);
             } else {
-                resolve(true);
+                resolve("OK");
             }
         });
     });
@@ -43,13 +44,13 @@ export function promisedWolAddress(macAddress: string, address: string): Promise
  * @param macAddress MAC address
  * @returns result
  */
-export function promisedWol(macAddress: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-        wol.wake(macAddress, (error: any) => {
+export function promisedWol(macAddress: string): Promise<ErrorCallback | string> {
+    return new Promise(resolve => {
+        wol.wake(macAddress, (error: ErrorCallback) => {
             if (error) {
-                reject;
+                resolve(error);
             } else {
-                resolve(true);
+                resolve("OK");
             }
         });
     });

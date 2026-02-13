@@ -140,6 +140,40 @@ class LgWebos extends utils.Adapter {
             let level: any = {};
             let system = Endpoint.LUNA_SET_SYSTEM_SETTINGS;
             let method = "luna://";
+            if (id.indexOf(".remote.settings.") !== -1) {
+                if (this.picture.get(deviceId)) {
+                    system = Endpoint.SET_SYSTEM_SETTINGS;
+                    method = "ssap://";
+                }
+                if (command == "svcMenuFlag") {
+                    this.devices.get(deviceId)?.request(
+                        id,
+                        "request",
+                        system,
+                        {
+                            category: "other",
+                            settings: { svcMenuFlag: state.val },
+                        },
+                        method,
+                    );
+                } else if (command != undefined) {
+                    if (typeof state.val === "string" && state.val.startsWith("{")) {
+                        try {
+                            state.val = JSON.parse(state.val);
+                        } catch (error: unknown) {
+                            if (typeof error === "string") {
+                                this.log.error(error);
+                            } else if (error instanceof Error) {
+                                this.log.error(`${error.name}: ${error.message}`);
+                            }
+                            return;
+                        }
+                    }
+                    settings[command] = typeof state.val === "number" ? state.val?.toString() : state.val;
+                    void this.systemSettings(id, deviceId, settings, system, method);
+                }
+                return;
+            }
             switch (command) {
                 case "rewind":
                 case "fastForward":
@@ -414,133 +448,6 @@ class LgWebos extends utils.Adapter {
                         .get(deviceId)
                         ?.request(id, "request", Endpoint.LUNA_SHOW_INPUT_PICKER, null, "luna://");
                     break;
-                case "brightness":
-                case "backlight":
-                case "contrast":
-                case "color":
-                case "sharpness":
-                case "tint":
-                    settings[command] = state.val?.toString();
-                    if (this.picture.get(deviceId)) {
-                        system = Endpoint.SET_SYSTEM_SETTINGS;
-                        method = "ssap://";
-                    }
-                    this.devices.get(deviceId)?.request(
-                        id,
-                        "request",
-                        system,
-                        {
-                            category: "picture",
-                            settings: settings,
-                        },
-                        method,
-                    );
-                    break;
-                case "pictureMode":
-                case "energySaving":
-                case "dynamicContrast":
-                case "peakBrightness":
-                case "gamma":
-                case "colorGamut":
-                case "hdrDynamicToneMapping":
-                case "noiseReduction":
-                case "dynamicColor":
-                case "smoothGradation":
-                case "mpegNoiseReduction":
-                    settings[command] = state.val;
-                    if (this.picture.get(deviceId)) {
-                        system = Endpoint.SET_SYSTEM_SETTINGS;
-                        method = "ssap://";
-                    }
-                    this.devices.get(deviceId)?.request(
-                        id,
-                        "request",
-                        system,
-                        {
-                            category: "picture",
-                            settings: settings,
-                        },
-                        method,
-                    );
-                    break;
-                case "motionEyeCare":
-                case "realCinema":
-                case "eyeComfortMode":
-                    settings[command] = state.val ? "on" : "off";
-                    if (this.picture.get(deviceId)) {
-                        system = Endpoint.SET_SYSTEM_SETTINGS;
-                        method = "ssap://";
-                    }
-                    this.devices.get(deviceId)?.request(
-                        id,
-                        "request",
-                        system,
-                        {
-                            category: "picture",
-                            settings: settings,
-                        },
-                        method,
-                    );
-                    break;
-                case "blackLevel":
-                    if (typeof state.val === "string" && state.val.startsWith("{")) {
-                        try {
-                            level = JSON.parse(state.val);
-                            if (this.picture.get(deviceId)) {
-                                system = Endpoint.SET_SYSTEM_SETTINGS;
-                                method = "ssap://";
-                            }
-                            this.devices.get(deviceId)?.request(
-                                id,
-                                "request",
-                                system,
-                                {
-                                    category: "picture",
-                                    settings: { blackLevel: level },
-                                },
-                                method,
-                            );
-                        } catch (error: unknown) {
-                            if (typeof error === "string") {
-                                this.log.error(error);
-                            } else if (error instanceof Error) {
-                                this.log.error(`${error.name}: ${error.message}`);
-                            }
-                        }
-                    }
-                    break;
-                case "deviceName":
-                    if (this.picture.get(deviceId)) {
-                        system = Endpoint.SET_SYSTEM_SETTINGS;
-                        method = "ssap://";
-                    }
-                    this.devices.get(deviceId)?.request(
-                        id,
-                        "request",
-                        system,
-                        {
-                            category: "network",
-                            settings: { deviceName: state.val },
-                        },
-                        method,
-                    );
-                    break;
-                case "wolwowlOnOff":
-                    if (this.picture.get(deviceId)) {
-                        system = Endpoint.SET_SYSTEM_SETTINGS;
-                        method = "ssap://";
-                    }
-                    this.devices.get(deviceId)?.request(
-                        id,
-                        "request",
-                        system,
-                        {
-                            category: "network",
-                            settings: { wolwowlOnOff: state.val ? "true" : "false" },
-                        },
-                        method,
-                    );
-                    break;
                 default:
                     this.log.warn(`Cannot found command ${command} from device ${deviceId}`);
             }
@@ -550,7 +457,41 @@ class LgWebos extends utils.Adapter {
     /**
      * Own request
      *
-     * @param deviceId - State ID
+     * @param id - State ID
+     * @param deviceId - Object IP
+     * @param settings - State object
+     * @param system - Endpoint
+     * @param method - Methode
+     */
+    private async systemSettings(
+        id: string,
+        deviceId: string,
+        settings: any,
+        system: string,
+        method: string,
+    ): Promise<void> {
+        const obj = await this.getObjectAsync(id);
+        if (obj && obj.native && obj.native.category) {
+            this.devices.get(deviceId)?.request(
+                id,
+                "request",
+                system,
+                {
+                    category: obj.native.category,
+                    settings: settings,
+                },
+                method,
+            );
+            await this.setState(id, {
+                ack: true,
+            });
+        }
+    }
+
+    /**
+     * Own request
+     *
+     * @param deviceId - Object IP
      * @param state - State object
      */
     private own_request(deviceId: string, state: ioBroker.State | null | undefined): void {
