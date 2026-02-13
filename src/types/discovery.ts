@@ -9,6 +9,10 @@ export interface Discovery {
      */
     discovery(ip: string): void;
     /**
+     * Actived MDNS Log
+     */
+    mdnLog(val: boolean): void;
+    /**
      * destroy
      */
     destroy(): void;

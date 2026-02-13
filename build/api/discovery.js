@@ -41,6 +41,7 @@ class lgtv_discovery extends import_node_events.EventEmitter {
   adapter;
   message;
   sendTimeout;
+  log;
   /**
    * LG Discovery
    *
@@ -66,12 +67,13 @@ class lgtv_discovery extends import_node_events.EventEmitter {
 \r
 `;
     this.message = import_node_buffer.Buffer.from(ssdp_msg);
+    this.log = false;
   }
   /**
    * Send SSDP Discovery Message
    */
   _send_ssdp_discover() {
-    if (!this.ssdp_socket || !this.ssdp_socket._receiving) {
+    if (!this.ssdp_socket) {
       this.adapter.log.error(`Discover sspd socket not open!!!`);
       this.emit("update", "socket");
     } else {
@@ -90,6 +92,7 @@ class lgtv_discovery extends import_node_events.EventEmitter {
             } else if (error instanceof Error) {
               this.adapter.log.error(`discovery: ${error.name}: ${error.message}`);
             }
+            this.ssdp_socket = void 0;
           }
         }
       );
@@ -106,8 +109,10 @@ class lgtv_discovery extends import_node_events.EventEmitter {
       this._send_ssdp_discover();
     });
     this.ssdp_socket.on("message", (message, remote) => {
-      this.adapter.log.debug(`Address: ${remote.address}`);
-      this.adapter.log.debug(message);
+      if (this.log) {
+        this.adapter.log.debug(`Address: ${remote.address}`);
+        this.adapter.log.debug(message);
+      }
       if (remote.address == ip) {
         this.emit("update", "found");
       }
@@ -125,17 +130,26 @@ class lgtv_discovery extends import_node_events.EventEmitter {
         this.adapter.log.error(`discovery: ${error.name}: ${error.message}`);
       }
       this.ssdp_socket.close();
+      this.ssdp_socket = void 0;
     });
     this.ssdp_socket.bind();
+  }
+  /**
+   * Actived MDNS Log
+   */
+  mdnLog(val) {
+    this.adapter.log.debug(`MDN Log: ${val}`);
+    this.log = val;
   }
   /**
    * destroy
    */
   destroy() {
+    this.sendTimeout && this.adapter.clearTimeout(this.sendTimeout);
     if (this.ssdp_socket) {
       this.ssdp_socket.close();
+      this.ssdp_socket = void 0;
     }
-    this.sendTimeout && this.adapter.clearTimeout(this.sendTimeout);
   }
 }
 // Annotate the CommonJS export names for ESM import in node:

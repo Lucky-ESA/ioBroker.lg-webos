@@ -50,6 +50,54 @@ class creatObjects {
    * @param val Pictures Settings
    */
   async createSettings(val) {
+    if (this.dev.dp != void 0) {
+      let common;
+      if (this.firstStart) {
+        this.firstStart = false;
+        common = {
+          name: {
+            en: "Settings",
+            de: "Einstellungen",
+            ru: "\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438",
+            pt: "Configura\xE7\xF5es",
+            nl: "Setting",
+            fr: "R\xE9glages",
+            it: "Impostazioni impostazioni",
+            es: "Ajustes",
+            pl: "Setting",
+            uk: "\u041D\u0430\u043B\u0430\u0448\u0442\u0443\u0432\u0430\u043D\u043D\u044F",
+            "zh-cn": "\u786E\u5B9A"
+          },
+          desc: "Create by Adapter",
+          icon: "img/settings.png"
+        };
+        await this.createDataPoint(`${this.dev.dp}.remote.settings`, common, "channel", null, null, null);
+      }
+      common = {
+        type: val.type,
+        role: val.role,
+        name: val.name,
+        desc: "Create by Adapter",
+        read: true,
+        write: true,
+        ...val.attr
+      };
+      await this.createDataPoint(
+        `${this.dev.dp}.remote.settings.${val.settings}`,
+        common,
+        "state",
+        null,
+        null,
+        null
+      );
+    }
+  }
+  /**
+   * Create System Pictures Settings
+   *
+   * @param val Pictures Settings
+   */
+  async createSettingsOld(val) {
     if (this.dev.dp != void 0 && val.payload != void 0) {
       let common;
       if (this.firstStart) {
@@ -2159,28 +2207,6 @@ class creatObjects {
         def: "[]"
       };
       await this.createDataPoint(`${this.dev.dp}.status.responseStart`, common, "state", null, null, null);
-      common = {
-        type: "string",
-        role: "json",
-        name: {
-          en: "Possible settings",
-          de: "M\xF6gliche Einstellungen",
-          ru: "\u0412\u043E\u0437\u043C\u043E\u0436\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438",
-          pt: "Configura\xE7\xF5es poss\xEDveis",
-          nl: "Mogelijke instellingen",
-          fr: "Param\xE8tres possibles",
-          it: "Impostazioni possibili",
-          es: "Posibles configuraciones",
-          pl: "Mo\u017Cliwe ustawienia",
-          uk: "\u041C\u043E\u0436\u043B\u0438\u0432\u0456 \u043D\u0430\u043B\u0430\u0448\u0442\u0443\u0432\u0430\u043D\u043D\u044F",
-          "zh-cn": "\u53EF\u80FD\u7684\u8BBE\u7F6E"
-        },
-        desc: "Create by Adapter",
-        read: true,
-        write: false,
-        def: "[]"
-      };
-      await this.createDataPoint(`${this.dev.dp}.status.possibleSettings`, common, "state", null, null, null);
       common = {
         role: "button",
         name: {

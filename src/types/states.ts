@@ -50,9 +50,9 @@ export interface States {
      */
     updatePowerState(val: LGPowerState): Promise<void>;
     /**
-     * Update System Pictures Settings
+     * Update System Settings
      *
-     * @param val Pictures Settings
+     * @param val Settings
      */
     updateSettings(val: LGPictureSettings): Promise<void>;
     /**
@@ -71,4 +71,10 @@ export interface States {
      * @param val Input
      */
     updateInuptValue(val: LGInput): void;
+    /**
+     * setTypes
+     *
+     * @param val Object Types as json
+     */
+    setTypes(val: any): void;
 }

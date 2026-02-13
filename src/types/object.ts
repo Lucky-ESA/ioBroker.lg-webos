@@ -4,7 +4,6 @@ import type {
     LGFeatures,
     LGInput,
     LGLaunch,
-    LGPictureSettings,
     LGPowerState,
     LGVolume,
     LGVolumeOld,
@@ -74,8 +73,20 @@ export interface Objects {
      *
      * @param val Pictures Settings
      */
-    createSettings(val: LGPictureSettings): Promise<void>;
+    createSettings(val: Attribute): Promise<void>;
 }
+
+/**
+ * Attrinute
+ */
+export type Attribute = {
+    name: string;
+    category: string;
+    settings: string;
+    role: string;
+    type: string;
+    attr: any;
+};
 
 /**
  * Common States

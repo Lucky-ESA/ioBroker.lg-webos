@@ -39,6 +39,7 @@ class updateStates {
   dev;
   adapter;
   input = {};
+  objectId = {};
   /**
    * Create possible inputs
    *
@@ -320,42 +321,39 @@ class updateStates {
     }
   }
   /**
-   * Update System Pictures Settings
+   * setTypes
    *
-   * @param val Pictures Settings
+   * @param val Object Types as json
+   */
+  setTypes(val) {
+    this.objectId = val;
+  }
+  /**
+   * Update System Settings
+   *
+   * @param val Settings
    */
   async updateSettings(val) {
     if (this.dev.dp != void 0 && val.payload != void 0) {
-      let new_val = "";
       for (const attribute in val.payload.settings) {
-        switch (attribute) {
-          case "brightness":
-          case "backlight":
-          case "contrast":
-          case "color":
-          case "sharpness":
-          case "tint":
-            new_val = Number(val.payload.settings[attribute]);
-            break;
-          case "wolwowlOnOff":
-            new_val = val.payload.settings[attribute] == "true" ? true : false;
-            break;
-          case "eyeComfortMode":
-          case "realCinema":
-          case "motionEyeCare":
-            new_val = val.payload.settings[attribute] == "on" ? true : false;
-            break;
-          case "blackLevel":
-            new_val = JSON.stringify(val.payload.settings[attribute]);
-            break;
-          default:
-            new_val = val.payload.settings[attribute];
-        }
-        if (val.payload.settings[attribute] != void 0 && new_val != "") {
-          await this.adapter.setState(`${this.dev.dp}.remote.settings.${attribute}`, {
-            val: new_val,
-            ack: true
-          });
+        if (this.objectId[`${this.adapter.namespace}.remote.settings.${attribute}`]) {
+          const type = this.objectId[`${this.adapter.namespace}.remote.settings.${attribute}`];
+          const x = val.payload.settings[attribute];
+          let value;
+          if (type == "number") {
+            value = Number(x);
+          } else if (type == "boolean") {
+            const new_val = x !== null && x !== void 0 && !["false", "", "0", "no", "off"].includes(x.toString().toLowerCase());
+            value = typeof x !== "boolean" ? new_val : x;
+          } else {
+            value = x.toString();
+          }
+          if (value != void 0) {
+            await this.adapter.setState(`${this.dev.dp}.remote.settings.${attribute}`, {
+              val: value,
+              ack: true
+            });
+          }
         }
       }
     }

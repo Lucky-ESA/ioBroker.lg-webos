@@ -3,7 +3,7 @@ import mdns from "multicast-dns";
 import { EventEmitter } from "node:events";
 import { WebSocket } from "partysocket";
 import { v4 as uuidv4 } from "uuid";
-import type { ConfigDevice, Device, pointerJson, respCheck } from "../types/device";
+import type { ConfigDevice, Device, pointerJson, respCheck, SystemConfig } from "../types/device";
 import type { handshake } from "../types/handshake";
 import type { AxiosResponse } from "../types/object";
 import type { LGResponse } from "../types/response";
@@ -53,11 +53,12 @@ export class TVHandler extends EventEmitter implements Device {
     private getRequest: axoisRrequest;
     private socketPath: string;
     private openPointerRequest: pointerJson;
-    private isSettings: string[] = [];
     private closeWS: string = "";
     private isStatus: boolean;
     private discover: lgtv_discovery;
     private discovery: string;
+    private systemSettings: Record<string, string[]> = {};
+    private system: SystemConfig;
 
     /**
      * Device
@@ -84,6 +85,7 @@ export class TVHandler extends EventEmitter implements Device {
         this.interval = device.interval;
         this.discovery = device.discover;
         this.luna = device.luna;
+        this.system = typeof device.system === "string" ? JSON.parse(device.system) : device.system;
         this.key = null;
         this.isConnected = false;
         this.isRegistered = false;
@@ -124,6 +126,37 @@ export class TVHandler extends EventEmitter implements Device {
      * Start Class
      */
     private async onReady(): Promise<void> {
+        const settings = await this.adapter.getStatesAsync(`${this.dp}.remote.settings.*`);
+        const objectId: any = {};
+        if (typeof this.system === "object" && this.system.length) {
+            for (const sys of this.system) {
+                if (!this.systemSettings[sys.category]) {
+                    this.systemSettings[sys.category] = [];
+                }
+                this.systemSettings[sys.category].push(sys.settings);
+                objectId[`${this.adapter.namespace}.remote.settings.${sys.settings}`] = sys.type;
+                try {
+                    if (sys.attr.startsWith("{")) {
+                        sys.attr = JSON.parse(sys.attr);
+                        await this.objects.createSettings(sys);
+                    }
+                } catch (error: unknown) {
+                    if (typeof error === "string") {
+                        this.adapter.log.error(`${error}`);
+                    } else if (error instanceof Error) {
+                        this.adapter.log.error(`${error.name}: ${error.message}`);
+                    }
+                }
+            }
+            for (const id in settings) {
+                if (objectId[id]) {
+                    this.adapter.log.debug(`Delete object ${id}`);
+                    await this.adapter.delObjectAsync(id, { recursive: true });
+                }
+            }
+            this.states.setTypes(JSON.parse(JSON.stringify(objectId)));
+            this.adapter.log.debug(JSON.stringify(this.systemSettings));
+        }
         await this.objects.createDevice();
         await this.objects.createPointerConnection();
         const state = await this.adapter.getStateAsync(`${this.dp}.system.pair_code`);
@@ -132,26 +165,6 @@ export class TVHandler extends EventEmitter implements Device {
             this.pair = handshake_paired;
             this.pair["client-key"] = this.key;
             this.adapter.log.debug(`Key: ${this.key}`);
-        }
-        const respSettings = await this.adapter.getStateAsync(`${this.dp}.status.possibleSettings`);
-        if (
-            respSettings &&
-            respSettings.val &&
-            typeof respSettings.val === "string" &&
-            respSettings.val.startsWith("[")
-        ) {
-            try {
-                const allSettings: string[] = JSON.parse(respSettings.val);
-                if (typeof allSettings === "object" && allSettings.length > 0) {
-                    this.isSettings = allSettings;
-                }
-            } catch (error: unknown) {
-                if (typeof error === "string") {
-                    this.adapter.log.error(`${error}`);
-                } else if (error instanceof Error) {
-                    this.adapter.log.error(`${error.name}: ${error.message}`);
-                }
-            }
         }
         const respStart = await this.adapter.getStateAsync(`${this.dp}.status.responseStart`);
         if (respStart && respStart.val && typeof respStart.val === "string" && respStart.val.startsWith("[")) {
@@ -174,7 +187,6 @@ export class TVHandler extends EventEmitter implements Device {
             }
         }
         this.adapter.log.debug(JSON.stringify(this.reqResp));
-        this.adapter.log.debug(JSON.stringify(this.isSettings));
         this.startWebSocket();
     }
 
@@ -536,20 +548,6 @@ export class TVHandler extends EventEmitter implements Device {
             val: JSON.stringify(this.reqResp),
             ack: true,
         });
-        const settings = [];
-        for (const r of this.reqResp) {
-            if (
-                r[1].response != "response" &&
-                r[1].settings != "No Value" &&
-                r[1].settings != "" &&
-                r[1].category == "picture" &&
-                !r[1].settings.includes(",")
-            ) {
-                settings.push(r[1].settings);
-            }
-        }
-        this.isSettings = settings;
-        await this.adapter.setState(`${this.dp}.status.possibleSettings`, { val: JSON.stringify(settings), ack: true });
     }
 
     /**
@@ -570,7 +568,7 @@ export class TVHandler extends EventEmitter implements Device {
         } else if (val.payload.product_name) {
             await this.objects.createSystem(val);
         } else if (typeof val.payload.settings === "object") {
-            await this.objects.createSettings(val);
+            await this.states.updateSettings(val);
         } else if (val.payload.launchPoints) {
             await this.objects.createLaunch(val);
         } else if (val.payload.features || val.payload.configs) {
@@ -732,20 +730,17 @@ export class TVHandler extends EventEmitter implements Device {
         }
         this.sendCommand("subscribe", Endpoint.GET_APPS, null, first);
         await this.sleep(100);
-        this.sendCommand(
-            "subscribe",
-            Endpoint.GET_SYSTEM_SETTINGS,
-            { category: "network", keys: ["deviceName"] },
-            first,
-        );
-        await this.sleep(100);
-        this.sendCommand(
-            "subscribe",
-            Endpoint.GET_SYSTEM_SETTINGS,
-            { category: "network", keys: ["wolwowlOnOff"] },
-            first,
-        );
-        await this.sleep(100);
+        for (const lgSys in this.systemSettings) {
+            this.adapter.log.error(lgSys);
+            this.adapter.log.error(JSON.stringify(this.systemSettings[lgSys]));
+            this.sendCommand(
+                "subscribe",
+                Endpoint.GET_SYSTEM_SETTINGS,
+                { category: lgSys, keys: this.systemSettings[lgSys] },
+                first,
+            );
+            await this.sleep(100);
+        }
         /**
         this.sendCommand("subscribe", Endpoint.GET_APP_STATUS, null, first);
         await this.sleep(100);
@@ -774,54 +769,6 @@ export class TVHandler extends EventEmitter implements Device {
         );
         await this.sleep(100);
          */
-        const keys = [
-            "contrast",
-            "backlight",
-            "brightness",
-            "color",
-            "energySaving",
-            "pictureMode",
-            "sharpness",
-            "dynamicContrast",
-            "peakBrightness",
-            "gamma",
-            "motionEyeCare",
-            "colorGamut",
-            "hdrDynamicToneMapping",
-            "blackLevel",
-            "realCinema",
-            "tint",
-            "noiseReduction",
-            "mpegNoiseReduction",
-            "smoothGradation",
-            "dynamicColor",
-            "eyeComfortMode",
-        ];
-        if (this.isSettings.length > 0) {
-            this.sendCommand(
-                "subscribe",
-                Endpoint.GET_SYSTEM_SETTINGS,
-                {
-                    category: "picture",
-                    keys: this.isSettings,
-                },
-                first,
-            );
-            await this.sleep(100);
-        } else if (this.reqResp && this.reqResp.length > 0) {
-            for (const key of keys) {
-                this.sendCommand(
-                    "subscribe",
-                    Endpoint.GET_SYSTEM_SETTINGS,
-                    {
-                        category: "picture",
-                        keys: [key],
-                    },
-                    first,
-                );
-                await this.sleep(100);
-            }
-        }
         this.sendCommand("subscribe", Endpoint.GET_CURRENT_APP_INFO, null, first);
         await this.sleep(100);
         if (this.isFirstStart) {
@@ -889,7 +836,7 @@ export class TVHandler extends EventEmitter implements Device {
         await this.sleep(3000);
         this.startWebSocketDelay && this.adapter.clearTimeout(this.startWebSocketDelay);
         this.startWebSocketDelay = undefined;
-        if (this.ip && this.discovery == "ssdp") {
+        if (this.ip && this.discovery == "dgram") {
             this.discover.discovery(this.ip);
         } else {
             this.startMulticast();
@@ -955,7 +902,7 @@ export class TVHandler extends EventEmitter implements Device {
             this.discover.destroy();
             this.delayStartWebSocket();
         } else if (type == "socket" || type == "sendError" || type == "error") {
-            if (this.ip) {
+            if (this.ip && !this.isConnected) {
                 this.discover.destroy();
                 await this.sleep(3000);
                 this.discover.discovery(this.ip);
@@ -1513,6 +1460,7 @@ export class TVHandler extends EventEmitter implements Device {
     public mdnLog(val: boolean): void {
         this.adapter.log.debug(`MDN Log: ${val}`);
         this.log = val;
+        this.discover.mdnLog(val);
     }
 
     /**

@@ -13,6 +13,7 @@ export class lgtv_discovery extends EventEmitter implements Discovery {
     private adapter: ioBroker.Adapter;
     private message: Buffer;
     private sendTimeout: ioBroker.Timeout | undefined;
+    private log: boolean;
 
     /**
      * LG Discovery
@@ -32,13 +33,14 @@ export class lgtv_discovery extends EventEmitter implements Discovery {
         ssdp_msg += `ST: urn:dial-multiscreen-org:service:dial:1\r\n`;
         ssdp_msg += `USER-AGENT: ioBroker\r\n\r\n`;
         this.message = Buffer.from(ssdp_msg);
+        this.log = false;
     }
 
     /**
      * Send SSDP Discovery Message
      */
     private _send_ssdp_discover(): void {
-        if (!this.ssdp_socket || !this.ssdp_socket._receiving) {
+        if (!this.ssdp_socket) {
             this.adapter.log.error(`Discover sspd socket not open!!!`);
             this.emit("update", "socket");
         } else {
@@ -57,6 +59,7 @@ export class lgtv_discovery extends EventEmitter implements Discovery {
                         } else if (error instanceof Error) {
                             this.adapter.log.error(`discovery: ${error.name}: ${error.message}`);
                         }
+                        this.ssdp_socket = undefined;
                     }
                 },
             );
@@ -74,8 +77,10 @@ export class lgtv_discovery extends EventEmitter implements Discovery {
             this._send_ssdp_discover();
         });
         this.ssdp_socket.on("message", (message: any, remote: { address: null }) => {
-            this.adapter.log.debug(`Address: ${remote.address}`);
-            this.adapter.log.debug(message);
+            if (this.log) {
+                this.adapter.log.debug(`Address: ${remote.address}`);
+                this.adapter.log.debug(message);
+            }
             if (remote.address == ip) {
                 this.emit("update", "found");
             }
@@ -93,17 +98,27 @@ export class lgtv_discovery extends EventEmitter implements Discovery {
                 this.adapter.log.error(`discovery: ${error.name}: ${error.message}`);
             }
             this.ssdp_socket.close();
+            this.ssdp_socket = undefined;
         });
         this.ssdp_socket.bind();
+    }
+
+    /**
+     * Actived MDNS Log
+     */
+    public mdnLog(val: boolean): void {
+        this.adapter.log.debug(`MDN Log: ${val}`);
+        this.log = val;
     }
 
     /**
      * destroy
      */
     public destroy(): void {
+        this.sendTimeout && this.adapter.clearTimeout(this.sendTimeout);
         if (this.ssdp_socket) {
             this.ssdp_socket.close();
+            this.ssdp_socket = undefined;
         }
-        this.sendTimeout && this.adapter.clearTimeout(this.sendTimeout);
     }
 }

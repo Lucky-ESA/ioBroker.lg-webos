@@ -91,6 +91,7 @@ export type ConfigDevice = {
     dp?: string;
     system: [
         {
+            name: string;
             category: string;
             settings: string;
             role: string;
@@ -99,6 +100,20 @@ export type ConfigDevice = {
         },
     ];
 };
+
+/**
+ * Config Devices Json
+ */
+export type SystemConfig = [
+    {
+        name: string;
+        category: string;
+        settings: string;
+        role: string;
+        type: string;
+        attr: string;
+    },
+];
 
 /**
  * Pointer Messages JSON

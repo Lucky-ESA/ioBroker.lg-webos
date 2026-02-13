@@ -19,6 +19,7 @@ export class updateStates implements States {
     private dev: ConfigDevice;
     private adapter: ioBroker.Adapter;
     private input: { [key in string]: string } = {};
+    private objectId: any = {};
     //private oldValue: { [key in string]: string | undefined } = {};
 
     /**
@@ -324,42 +325,43 @@ export class updateStates implements States {
     }
 
     /**
-     * Update System Pictures Settings
+     * setTypes
      *
-     * @param val Pictures Settings
+     * @param val Object Types as json
+     */
+    public setTypes(val: any): void {
+        this.objectId = val;
+    }
+
+    /**
+     * Update System Settings
+     *
+     * @param val Settings
      */
     public async updateSettings(val: LGPictureSettings): Promise<void> {
         if (this.dev.dp != undefined && val.payload != undefined) {
-            let new_val: string | number | boolean = "";
             for (const attribute in val.payload.settings) {
-                switch (attribute) {
-                    case "brightness":
-                    case "backlight":
-                    case "contrast":
-                    case "color":
-                    case "sharpness":
-                    case "tint":
-                        new_val = Number(val.payload.settings[attribute]);
-                        break;
-                    case "wolwowlOnOff":
-                        new_val = val.payload.settings[attribute] == "true" ? true : false;
-                        break;
-                    case "eyeComfortMode":
-                    case "realCinema":
-                    case "motionEyeCare":
-                        new_val = val.payload.settings[attribute] == "on" ? true : false;
-                        break;
-                    case "blackLevel":
-                        new_val = JSON.stringify(val.payload.settings[attribute]);
-                        break;
-                    default:
-                        new_val = val.payload.settings[attribute];
-                }
-                if (val.payload.settings[attribute] != undefined && new_val != "") {
-                    await this.adapter.setState(`${this.dev.dp}.remote.settings.${attribute}`, {
-                        val: new_val,
-                        ack: true,
-                    });
+                if (this.objectId[`${this.adapter.namespace}.remote.settings.${attribute}`]) {
+                    const type = this.objectId[`${this.adapter.namespace}.remote.settings.${attribute}`];
+                    const x = val.payload.settings[attribute];
+                    let value: string | number | boolean;
+                    if (type == "number") {
+                        value = Number(x);
+                    } else if (type == "boolean") {
+                        const new_val =
+                            x !== null &&
+                            x !== undefined &&
+                            !["false", "", "0", "no", "off"].includes(x.toString().toLowerCase());
+                        value = typeof x !== "boolean" ? new_val : x;
+                    } else {
+                        value = x.toString();
+                    }
+                    if (value != undefined) {
+                        await this.adapter.setState(`${this.dev.dp}.remote.settings.${attribute}`, {
+                            val: value,
+                            ack: true,
+                        });
+                    }
                 }
             }
         }

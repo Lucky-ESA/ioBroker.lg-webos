@@ -1,6 +1,6 @@
 import { Buffer } from "node:buffer";
 import type { ConfigDevice } from "../types/device";
-import type { AxiosResponse, CommonStates, Objects } from "../types/object";
+import type { Attribute, AxiosResponse, CommonStates, Objects } from "../types/object";
 import type {
     LGApps,
     LGChannelList,
@@ -46,7 +46,56 @@ export class creatObjects implements Objects {
      *
      * @param val Pictures Settings
      */
-    public async createSettings(val: LGPictureSettings): Promise<void> {
+    public async createSettings(val: Attribute): Promise<void> {
+        if (this.dev.dp != undefined) {
+            let common: CommonStates;
+            if (this.firstStart) {
+                this.firstStart = false;
+                common = {
+                    name: {
+                        en: "Settings",
+                        de: "Einstellungen",
+                        ru: "Настройки",
+                        pt: "Configurações",
+                        nl: "Setting",
+                        fr: "Réglages",
+                        it: "Impostazioni impostazioni",
+                        es: "Ajustes",
+                        pl: "Setting",
+                        uk: "Налаштування",
+                        "zh-cn": "确定",
+                    },
+                    desc: "Create by Adapter",
+                    icon: "img/settings.png",
+                };
+                await this.createDataPoint(`${this.dev.dp}.remote.settings`, common, "channel", null, null, null);
+            }
+            common = {
+                type: val.type,
+                role: val.role,
+                name: val.name,
+                desc: "Create by Adapter",
+                read: true,
+                write: true,
+                ...val.attr,
+            };
+            await this.createDataPoint(
+                `${this.dev.dp}.remote.settings.${val.settings}`,
+                common,
+                "state",
+                null,
+                null,
+                null,
+            );
+        }
+    }
+
+    /**
+     * Create System Pictures Settings
+     *
+     * @param val Pictures Settings
+     */
+    private async createSettingsOld(val: LGPictureSettings): Promise<void> {
         if (this.dev.dp != undefined && val.payload != undefined) {
             let common: CommonStates;
             if (this.firstStart) {
@@ -2180,28 +2229,6 @@ export class creatObjects implements Objects {
                 def: "[]",
             };
             await this.createDataPoint(`${this.dev.dp}.status.responseStart`, common, "state", null, null, null);
-            common = {
-                type: "string",
-                role: "json",
-                name: {
-                    en: "Possible settings",
-                    de: "Mögliche Einstellungen",
-                    ru: "Возможные настройки",
-                    pt: "Configurações possíveis",
-                    nl: "Mogelijke instellingen",
-                    fr: "Paramètres possibles",
-                    it: "Impostazioni possibili",
-                    es: "Posibles configuraciones",
-                    pl: "Możliwe ustawienia",
-                    uk: "Можливі налаштування",
-                    "zh-cn": "可能的设置",
-                },
-                desc: "Create by Adapter",
-                read: true,
-                write: false,
-                def: "[]",
-            };
-            await this.createDataPoint(`${this.dev.dp}.status.possibleSettings`, common, "state", null, null, null);
             common = {
                 role: "button",
                 name: {
