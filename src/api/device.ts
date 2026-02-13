@@ -731,8 +731,6 @@ export class TVHandler extends EventEmitter implements Device {
         this.sendCommand("subscribe", Endpoint.GET_APPS, null, first);
         await this.sleep(100);
         for (const lgSys in this.systemSettings) {
-            this.adapter.log.error(lgSys);
-            this.adapter.log.error(JSON.stringify(this.systemSettings[lgSys]));
             this.sendCommand(
                 "subscribe",
                 Endpoint.GET_SYSTEM_SETTINGS,
