@@ -17,7 +17,7 @@ Einige States haben bei ältere TV`s keine Funktion. Leider habe ich keine Infos
 - [Own request Objekte](#eigene-anfragen-objekte)
 - [State Objekte](#state-objekte)
 - [Status Objekte](#status-objekte)
-- [System Objekte](#system-objekte)
+- [System Objekte](#system-einstellungs-objekte-in-der-instanz-einstellung-erstellbar)
 - [Einstellung Objekte](#system-einstellungs-objekte)
 - [Blockly](#blockly)
 - [Bekannte Endpunkte](#bekannte-endpunkte)
@@ -236,13 +236,12 @@ Einige States haben bei ältere TV`s keine Funktion. Leider habe ich keine Infos
 
 [Zusammenfassung](#zusammenfassung)
 
-| Objekt                   | Kurze Beschreibung                                              |
-| ------------------------ | --------------------------------------------------------------- |
-| status.online            | TV-Status (Ein/Aus)                                             |
-| status.pointerConnection | Verbindung für Tasteneingaben                                   |
-| status.possibleSettings  | Mögliche Systemeinstellungen (falls leer, sind keine vorhanden) |
-| status.powerState        | Betriebszustand                                                 |
-| status.responseStart     | TV-Reaktion nach dem Start                                      |
+| Objekt                   | Kurze Beschreibung            |
+| ------------------------ | ----------------------------- |
+| status.online            | TV-Status (Ein/Aus)           |
+| status.pointerConnection | Verbindung für Tasteneingaben |
+| status.powerState        | Betriebszustand               |
+| status.responseStart     | TV-Reaktion nach dem Start    |
 
 ![object_status.png](img/object_status.png)
 
@@ -266,35 +265,38 @@ Einige States haben bei ältere TV`s keine Funktion. Leider habe ich keine Infos
 
 ![object_system.png](img/object_system.png)
 
-### System Einstellungs Objekte
+### System Einstellungs Objekte (In der Instanz Einstellung erstellbar)
 
 [Zusammenfassung](#zusammenfassung)
 
-| Objekt                                | Kurze Beschreibung             |
-| ------------------------------------- | ------------------------------ |
-| remote.settings.backlight             | Hintergrundbeleuchtung         |
-| remote.settings.blackLevel            | Schwarzwert                    |
-| remote.settings.brightness            | Helligkeit                     |
-| remote.settings.color                 | Farbe                          |
-| remote.settings.colorGamut            | Farbraum                       |
-| remote.settings.contrast              | Kontrast                       |
-| remote.settings.deviceName            | Gerätename                     |
-| remote.settings.dynamicColor          | Dynamische Farbe               |
-| remote.settings.dynamicContrast       | Dynamischer Kontrast           |
-| remote.settings.energySaving          | Energiesparmodus               |
-| remote.settings.eyeComfortMode        | Augenkomfortmodus              |
-| remote.settings.gamma                 | Gamma                          |
-| remote.settings.hdrDynamicToneMapping | Dynamisches HDR-Tonwertmapping |
-| remote.settings.motionEyeCare         | Bewegungs-Augenschutz          |
-| remote.settings.mpegNoiseReduction    | MPEG-Rauschunterdrückung       |
-| remote.settings.noiseReduction        | Rauschunterdrückung            |
-| remote.settings.peakBrightness        | Maximale Helligkeit            |
-| remote.settings.pictureMode           | Bildmodus                      |
-| remote.settings.realCinema            | Real Cinema                    |
-| remote.settings.sharpness             | Schärfe                        |
-| remote.settings.smoothGradation       | Sanfte Farbübergänge           |
-| remote.settings.tint                  | Farbton                        |
-| remote.settings.wolwowlOnOff          | Wake-on-LAN ein/aus            |
+### Beispiel von 55NANO81T6A webOSTV 24
+
+| Objekt                                | Kurze Beschreibung                                                              |
+| ------------------------------------- | ------------------------------------------------------------------------------- |
+| remote.settings.backlight             | Hintergrundbeleuchtung                                                          |
+| remote.settings.blackLevel            | Schwarzwert                                                                     |
+| remote.settings.brightness            | Helligkeit                                                                      |
+| remote.settings.color                 | Farbe                                                                           |
+| remote.settings.colorGamut            | Farbraum                                                                        |
+| remote.settings.contrast              | Kontrast                                                                        |
+| remote.settings.deviceName            | Gerätename                                                                      |
+| remote.settings.dynamicColor          | Dynamische Farbe                                                                |
+| remote.settings.dynamicContrast       | Dynamischer Kontrast                                                            |
+| remote.settings.energySaving          | Energiesparmodus                                                                |
+| remote.settings.eyeComfortMode        | Augenkomfortmodus                                                               |
+| remote.settings.gamma                 | Gamma                                                                           |
+| remote.settings.hdrDynamicToneMapping | Dynamisches HDR-Tonwertmapping                                                  |
+| remote.settings.motionEyeCare         | Bewegungs-Augenschutz                                                           |
+| remote.settings.mpegNoiseReduction    | MPEG-Rauschunterdrückung                                                        |
+| remote.settings.noiseReduction        | Rauschunterdrückung                                                             |
+| remote.settings.peakBrightness        | Maximale Helligkeit                                                             |
+| remote.settings.pictureMode           | Bildmodus                                                                       |
+| remote.settings.realCinema            | Real Cinema                                                                     |
+| remote.settings.sharpness             | Schärfe                                                                         |
+| remote.settings.smoothGradation       | Sanfte Farbübergänge                                                            |
+| remote.settings.svcMenuFlag           | Aktiviert das vollständige Servicemenü auf Modelle webTV >23 (false für aktive) |
+| remote.settings.tint                  | Farbton                                                                         |
+| remote.settings.wolwowlOnOff          | Wake-on-LAN ein/aus                                                             |
 
 ![object_settings.png](img/object_settings.png)
 

@@ -235,13 +235,12 @@ Some states don't work on older TVs. Unfortunately, I don't have information on 
 
 [Summary](#summary)
 
-| Object                   | Short description                                        |
-| ------------------------ | -------------------------------------------------------- |
-| status.online            | TV status on/off                                         |
-| status.pointerConnection | Connection for button requests                           |
-| status.possibleSettings  | Possible system settings (if empty, then there are none) |
-| status.powerState        | Power State                                              |
-| status.responseStart     | TV response after the start                              |
+| Object                   | Short description              |
+| ------------------------ | ------------------------------ |
+| status.online            | TV status on/off               |
+| status.pointerConnection | Connection for button requests |
+| status.powerState        | Power State                    |
+| status.responseStart     | TV response after the start    |
 
 ![object_status.png](img/object_status.png)
 
@@ -265,35 +264,38 @@ Some states don't work on older TVs. Unfortunately, I don't have information on 
 
 ![object_system.png](img/object_system.png)
 
-### Setting objects
+### Setting objects (Create in the instance settings)
 
 [Summary](#summary)
 
-| Object                                | Short description        |
-| ------------------------------------- | ------------------------ |
-| remote.settings.backlight             | Backlight                |
-| remote.settings.blackLevel            | Black level              |
-| remote.settings.brightness            | Brightness               |
-| remote.settings.color                 | Color                    |
-| remote.settings.colorGamut            | Color gamut              |
-| remote.settings.contrast              | Contrast                 |
-| remote.settings.deviceName            | Device Name              |
-| remote.settings.dynamicColor          | Dynamic Color            |
-| remote.settings.dynamicContrast       | Dynamic contrast         |
-| remote.settings.energySaving          | Energy Saving            |
-| remote.settings.eyeComfortMode        | Eye Comfort Mode         |
-| remote.settings.gamma                 | Gamma                    |
-| remote.settings.hdrDynamicToneMapping | HDR dynamic tone mapping |
-| remote.settings.motionEyeCare         | Motion eye Care          |
-| remote.settings.mpegNoiseReduction    | MPEG noise reduction     |
-| remote.settings.noiseReduction        | Noise reduction          |
-| remote.settings.peakBrightness        | Peak brightness          |
-| remote.settings.pictureMode           | Picture Mode             |
-| remote.settings.realCinema            | Real cinema              |
-| remote.settings.sharpness             | Sharpness                |
-| remote.settings.smoothGradation       | Amooth gradation         |
-| remote.settings.tint                  | Tint                     |
-| remote.settings.wolwowlOnOff          | Wake on lan On/Off       |
+### Example from 55NANO81T6A webOSTV 24
+
+| Object                                | Short description                                                 |
+| ------------------------------------- | ----------------------------------------------------------------- |
+| remote.settings.backlight             | Backlight                                                         |
+| remote.settings.blackLevel            | Black level                                                       |
+| remote.settings.brightness            | Brightness                                                        |
+| remote.settings.color                 | Color                                                             |
+| remote.settings.colorGamut            | Color gamut                                                       |
+| remote.settings.contrast              | Contrast                                                          |
+| remote.settings.deviceName            | Device Name                                                       |
+| remote.settings.dynamicColor          | Dynamic Color                                                     |
+| remote.settings.dynamicContrast       | Dynamic contrast                                                  |
+| remote.settings.energySaving          | Energy Saving                                                     |
+| remote.settings.eyeComfortMode        | Eye Comfort Mode                                                  |
+| remote.settings.gamma                 | Gamma                                                             |
+| remote.settings.hdrDynamicToneMapping | HDR dynamic tone mapping                                          |
+| remote.settings.motionEyeCare         | Motion eye Care                                                   |
+| remote.settings.mpegNoiseReduction    | MPEG noise reduction                                              |
+| remote.settings.noiseReduction        | Noise reduction                                                   |
+| remote.settings.peakBrightness        | Peak brightness                                                   |
+| remote.settings.pictureMode           | Picture Mode                                                      |
+| remote.settings.realCinema            | Real cinema                                                       |
+| remote.settings.sharpness             | Sharpness                                                         |
+| remote.settings.smoothGradation       | Amooth gradation                                                  |
+| remote.settings.svcMenuFlag           | Enable full Service Menu on models webosTV >23 (false for enable) |
+| remote.settings.tint                  | Tint                                                              |
+| remote.settings.wolwowlOnOff          | Wake on lan On/Off                                                |
 
 ![object_settings.png](img/object_settings.png)
 
