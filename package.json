@@ -23,7 +23,7 @@
     "@iobroker/adapter-core": "^3.3.2",
     "axios": "^1.13.2",
     "multicast-dns": "^7.2.5",
-    "partysocket": "^1.1.10",
+    "partysocket": "^1.1.16",
     "uuid": "^13.0.0",
     "wake_on_lan": "^1.0.0",
     "ws": "^8.18.3"
