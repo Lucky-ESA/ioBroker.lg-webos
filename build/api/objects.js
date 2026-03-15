@@ -2221,6 +2221,166 @@ class creatObjects {
       };
       await this.createDataPoint(`${this.dev.dp}.status.online`, common, "state", false, null, null);
       common = {
+        type: "boolean",
+        role: "button",
+        name: {
+          en: "Check Monitoring",
+          de: "\xDCberwachung pr\xFCfen",
+          ru: "\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u043C\u043E\u043D\u0438\u0442\u043E\u0440\u0438\u043D\u0433\u0430",
+          pt: "Verificar monitoramento",
+          nl: "Controleer de monitoring",
+          fr: "V\xE9rifier la surveillance",
+          it: "Controllo del monitoraggio",
+          es: "Verificar el monitoreo",
+          pl: "Sprawd\u017A monitorowanie",
+          uk: "\u041F\u0435\u0440\u0435\u0432\u0456\u0440\u0442\u0435 \u043C\u043E\u043D\u0456\u0442\u043E\u0440\u0438\u043D\u0433",
+          "zh-cn": "\u68C0\u67E5\u76D1\u63A7"
+        },
+        desc: "Create by Adapter",
+        read: false,
+        write: true
+      };
+      await this.createDataPoint(`${this.dev.dp}.status.monitoring_check`, common, "state", null, null, null);
+      common = {
+        type: "boolean",
+        role: "switch",
+        name: {
+          en: "Status Monitoring",
+          de: "Status\xFCberwachung",
+          ru: "\u041C\u043E\u043D\u0438\u0442\u043E\u0440\u0438\u043D\u0433 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u044F",
+          pt: "Monitoramento de status",
+          nl: "Statusbewaking",
+          fr: "Surveillance de l'\xE9tat",
+          it: "Monitoraggio dello stato",
+          es: "Monitoreo de estado",
+          pl: "Monitorowanie statusu",
+          uk: "\u041C\u043E\u043D\u0456\u0442\u043E\u0440\u0438\u043D\u0433 \u0441\u0442\u0430\u043D\u0443",
+          "zh-cn": "\u72B6\u6001\u76D1\u63A7"
+        },
+        desc: "Create by Adapter",
+        read: true,
+        write: false,
+        def: false
+      };
+      await this.createDataPoint(`${this.dev.dp}.status.monitoring_status`, common, "state", false, null, null);
+      common = {
+        type: "string",
+        role: "state",
+        name: {
+          en: "Monitoring Type",
+          de: "\xDCberwachungstyp",
+          ru: "\u0422\u0438\u043F \u043C\u043E\u043D\u0438\u0442\u043E\u0440\u0438\u043D\u0433\u0430",
+          pt: "Tipo de monitoramento",
+          nl: "Monitoringstype",
+          fr: "Type de surveillance",
+          it: "Tipo di monitoraggio",
+          es: "Tipo de monitoreo",
+          pl: "Typ monitorowania",
+          uk: "\u0422\u0438\u043F \u043C\u043E\u043D\u0456\u0442\u043E\u0440\u0438\u043D\u0433\u0443",
+          "zh-cn": "\u76D1\u6D4B\u7C7B\u578B"
+        },
+        desc: "Create by Adapter",
+        read: true,
+        write: false,
+        def: "off",
+        states: {
+          off: "Off",
+          dgram: "UDP4 Socket",
+          dns: "Multicast DNS"
+        }
+      };
+      await this.createDataPoint(`${this.dev.dp}.status.monitoring_type`, common, "state", "off", null, null);
+      if (this.dev.discover === "dgram") {
+        common = {
+          type: "string",
+          role: "state",
+          name: {
+            en: "SSDP IP",
+            de: "SSDP IP",
+            ru: "IP-\u0430\u0434\u0440\u0435\u0441 SSDP",
+            pt: "IP SSDP",
+            nl: "SSDP IP",
+            fr: "SSDP IP",
+            it: "IP SSDP",
+            es: "SSDP IP",
+            pl: "Adres IP SSDP",
+            uk: "IP-\u0430\u0434\u0440\u0435\u0441\u0430 SSDP",
+            "zh-cn": "SSDP IP"
+          },
+          desc: "Create by Adapter",
+          read: true,
+          write: true,
+          def: "239.255.255.250"
+        };
+        await this.createDataPoint(`${this.dev.dp}.status.ssdp_ip`, common, "state", null, null, null);
+        common = {
+          type: "number",
+          role: "value",
+          name: {
+            en: "SSDP Port",
+            de: "SSDP-Port",
+            ru: "\u041F\u043E\u0440\u0442 SSDP",
+            pt: "Porta SSDP",
+            nl: "SSDP-poort",
+            fr: "Port SSDP",
+            it: "Porta SSDP",
+            es: "Puerto SSDP",
+            pl: "Port SSDP",
+            uk: "\u041F\u043E\u0440\u0442 SSDP",
+            "zh-cn": "SSDP\u7AEF\u53E3"
+          },
+          desc: "Create by Adapter",
+          read: true,
+          write: true,
+          def: 1900
+        };
+        await this.createDataPoint(`${this.dev.dp}.status.ssdp_port`, common, "state", null, null, null);
+        let ssdp_msg = `M-SEARCH * HTTP/1.1\r
+`;
+        ssdp_msg += `HOST: <ip>:<port>\r
+`;
+        ssdp_msg += `MAN: "ssdp:discover"\r
+`;
+        ssdp_msg += `MX: 5\r
+`;
+        ssdp_msg += `ST: urn:dial-multiscreen-org:service:dial:1\r
+`;
+        ssdp_msg += `USER-AGENT: ioBroker\r
+\r
+`;
+        const old_msg = await this.adapter.getStateAsync(`${this.dev.dp}.status.ssdp_msg`);
+        let msg = ssdp_msg;
+        if (old_msg && old_msg.val && typeof old_msg.val === "string") {
+          msg = old_msg.val;
+        }
+        common = {
+          type: "string",
+          role: "state",
+          name: {
+            en: "SSDP Message",
+            de: "SSDP-Nachricht",
+            ru: "\u0421\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435 SSDP",
+            pt: "Mensagem SSDP",
+            nl: "SSDP-bericht",
+            fr: "Message SSDP",
+            it: "Messaggio SSDP",
+            es: "Mensaje SSDP",
+            pl: "Wiadomo\u015B\u0107 SSDP",
+            uk: "\u041F\u043E\u0432\u0456\u0434\u043E\u043C\u043B\u0435\u043D\u043D\u044F SSDP",
+            "zh-cn": "SSDP\u6D88\u606F"
+          },
+          desc: "Create by Adapter",
+          read: true,
+          write: true,
+          def: msg
+        };
+        await this.createDataPoint(`${this.dev.dp}.status.ssdp_msg`, common, "state", msg, null, null);
+      } else {
+        await this.adapter.delObjectAsync(`${this.dev.dp}.status.ssdp_ip`, { recursive: true });
+        await this.adapter.delObjectAsync(`${this.dev.dp}.status.ssdp_port`, { recursive: true });
+        await this.adapter.delObjectAsync(`${this.dev.dp}.status.ssdp_msg`, { recursive: true });
+      }
+      common = {
         type: "string",
         role: "json",
         name: {

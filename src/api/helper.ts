@@ -1,6 +1,7 @@
 import type { ErrorCallback } from "wake_on_lan";
 import wol from "wake_on_lan";
 import WebSocket from "ws";
+//import { WebSocketServer } from "ws";
 
 /**
  * create ws class

@@ -48,6 +48,20 @@ export interface Device {
      * @param payload Payload data
      */
     MessageHandler(id: string, type: string, uri?: string, payload?: any): Promise<void>;
+    /**
+     * Check Watching Connection
+     *
+     * @param id ioBroker object id
+     */
+    setCheck(id: string): Promise<void>;
+    /**
+     * Watching SSDP Message
+     *
+     * @param id ioBroker object id
+     * @param state ioBroker.State | null | undefined
+     * @param type "ip" | "port" | "msg"
+     */
+    setSsdpMsg(id: string, state: ioBroker.State | null | undefined, type: "ip" | "port" | "msg"): Promise<void>;
 }
 
 /**

@@ -16,4 +16,28 @@ export interface Discovery {
      * destroy
      */
     destroy(): void;
+    /**
+     * Change Message
+     *
+     * @param msg Message
+     */
+    setMsg(msg: string): void;
+    /**
+     * Change IP
+     *
+     * @param ip IP
+     */
+    setIp(ip: string): void;
+    /**
+     * Change Port
+     *
+     * @param port Port
+     */
+    setPort(port: string): void;
+    /**
+     * Set SSDP Data
+     *
+     * @param dp Object Device
+     */
+    setData(dp: string): Promise<void>;
 }

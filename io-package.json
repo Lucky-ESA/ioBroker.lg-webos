@@ -43,24 +43,11 @@
             "uk": "Керуйте своїм телевізором LG",
             "zh-cn": "控制您的LG电视"
         },
-        "authors": [
-            "Lucky-ESA <github@luckyskills.de>"
-        ],
-        "keywords": [
-            "lgtv",
-            "WebOS",
-            "Smart",
-            "TV",
-            "LG",
-            "Remote"
-        ],
+        "authors": ["Lucky-ESA <github@luckyskills.de>"],
+        "keywords": ["lgtv", "WebOS", "Smart", "TV", "LG", "Remote"],
         "docs": {
-            "en": [
-                "docs/en/README.md"
-            ],
-            "de": [
-                "docs/de/README.md"
-            ]
+            "en": ["docs/en/README.md"],
+            "de": ["docs/de/README.md"]
         },
         "licenseInformation": {
             "type": "free",
@@ -90,7 +77,7 @@
         ],
         "globalDependencies": [
             {
-                "admin": ">=7.6.17"
+                "admin": ">=7.7.22"
             }
         ]
     },

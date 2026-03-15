@@ -175,6 +175,18 @@ class LgWebos extends utils.Adapter {
                 return;
             }
             switch (command) {
+                case "monitoring_check":
+                    void this.devices.get(deviceId)?.setCheck(id);
+                    break;
+                case "ssdp_msg":
+                    void this.devices.get(deviceId)?.setSsdpMsg(id, state, "msg");
+                    break;
+                case "ssdp_ip":
+                    void this.devices.get(deviceId)?.setSsdpMsg(id, state, "ip");
+                    break;
+                case "ssdp_port":
+                    void this.devices.get(deviceId)?.setSsdpMsg(id, state, "port");
+                    break;
                 case "rewind":
                 case "fastForward":
                 case "exit":

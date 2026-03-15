@@ -13,7 +13,6 @@ import { Endpoint, forbidden_ip, promisedWol, promisedWolAddress, webSocketClass
 import { creatObjects } from "./objects";
 import { axoisRrequest } from "./request";
 import { updateStates } from "./states";
-
 /**
  * Device handler
  */
@@ -158,6 +157,7 @@ export class TVHandler extends EventEmitter implements Device {
             this.adapter.log.debug(JSON.stringify(this.systemSettings));
         }
         await this.objects.createDevice();
+        this.dp && (await this.discover.setData(this.dp));
         await this.objects.createPointerConnection();
         const state = await this.adapter.getStateAsync(`${this.dp}.system.pair_code`);
         if (state && state.val && typeof state.val === "string" && state.val.includes("aes-192-cbc")) {
@@ -452,6 +452,82 @@ export class TVHandler extends EventEmitter implements Device {
     }
 
     /**
+     * Set Watching Status
+     *
+     * @param val boolean
+     */
+    private async setWatching(val: boolean): Promise<void> {
+        let type = "off";
+        if (val) {
+            type = this.discovery;
+        }
+        await this.adapter.setState(`${this.dp}.status.monitoring_status`, { val: val, ack: true });
+        await this.adapter.setState(`${this.dp}.status.monitoring_type`, { val: type, ack: true });
+    }
+
+    /**
+     * Check Watching Connection
+     *
+     * @param id ioBroker object id
+     */
+    public async setCheck(id: string): Promise<void> {
+        if (this.ip) {
+            if (this.discovery == "dgram") {
+                if (!this.isConnected || !this.isRegistered) {
+                    this.discover.destroy();
+                    await this.sleep(500);
+                    this.discover.discovery(this.ip);
+                    await this.setWatching(true);
+                } else {
+                    await this.setWatching(false);
+                }
+            } else {
+                if (!this.isConnected || !this.isRegistered) {
+                    if (this.mdn != null) {
+                        this.mdn.destroy();
+                        this.mdn = null;
+                    }
+                    this.startMulticast();
+                    await this.setWatching(true);
+                } else {
+                    await this.setWatching(false);
+                }
+            }
+            await this.setAckFlag(id);
+        }
+    }
+
+    /**
+     * Watching SSDP Message
+     *
+     * @param id ioBroker object id
+     * @param state ioBroker.State | null | undefined
+     * @param type "ip" | "port" | "msg"
+     */
+    public async setSsdpMsg(
+        id: string,
+        state: ioBroker.State | null | undefined,
+        type: "ip" | "port" | "msg",
+    ): Promise<void> {
+        if (type === "ip") {
+            if (state && state.val && typeof state.val === "string") {
+                this.discover.setIp(state.val);
+                await this.setAckFlag(id);
+            }
+        } else if (type === "port") {
+            if (state && state.val && typeof state.val === "number") {
+                this.discover.setPort(state.val.toString());
+                await this.setAckFlag(id);
+            }
+        } else if (type === "msg") {
+            if (state && state.val && typeof state.val === "string") {
+                this.discover.setMsg(state.val);
+                await this.setAckFlag(id);
+            }
+        }
+    }
+
+    /**
      * Set ack flag
      *
      * @param objectId ioBroker object id
@@ -507,6 +583,7 @@ export class TVHandler extends EventEmitter implements Device {
                             });
                         }
                         this.isStatusTimeout = undefined;
+                        await this.setWatching(true);
                         this.emit("update", this.dp, val);
                     }, 60 * 1000);
                 }
@@ -514,6 +591,7 @@ export class TVHandler extends EventEmitter implements Device {
                 this.isStatusTimeout && this.adapter.clearTimeout(this.isStatusTimeout);
                 this.isStatusTimeout = undefined;
                 this.isStatus = val;
+                await this.setWatching(false);
                 await this.adapter.setState(`${this.dp}.status.online`, { val: val, ack: true });
                 this.emit("update", this.dp, val);
             }
@@ -839,6 +917,7 @@ export class TVHandler extends EventEmitter implements Device {
         } else {
             this.startMulticast();
         }
+        await this.setWatching(true);
     }
 
     /**
@@ -898,13 +977,27 @@ export class TVHandler extends EventEmitter implements Device {
         if (type == "found") {
             this.adapter.log.debug(`Found device ${this.ip}`);
             this.discover.destroy();
+            await this.sleep(500);
             this.delayStartWebSocket();
+            await this.setWatching(true);
         } else if (type == "socket" || type == "sendError" || type == "error") {
             if (this.ip && !this.isConnected) {
                 this.discover.destroy();
                 await this.sleep(3000);
                 this.discover.discovery(this.ip);
+                await this.setWatching(true);
             }
+        } else if (type == "close") {
+            this.adapter.log.debug(`UDP4 closed for device ${this.ip}`);
+            await this.sleep(5000);
+            if (this.ip && !this.isConnected) {
+                this.discover.destroy();
+                await this.sleep(3000);
+                this.discover.discovery(this.ip);
+                await this.setWatching(true);
+            }
+        } else if (type == "connect") {
+            this.adapter.log.debug(`UDP4 connected for device ${this.ip}`);
         }
     }
 
@@ -1587,6 +1680,7 @@ export class TVHandler extends EventEmitter implements Device {
         this.promiseDirectTimeout && this.adapter.clearTimeout(this.promiseDirectTimeout);
         await this.adapter.setState(`${this.dp}.status.online`, { val: false, ack: true });
         await this.adapter.setState(`${this.dp}.status.powerState`, { val: "unknown", ack: true });
+        await this.setWatching(false);
         await this.updatePointerStatus(false);
     }
 }

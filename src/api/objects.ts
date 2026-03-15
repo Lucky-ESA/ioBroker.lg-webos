@@ -2243,6 +2243,159 @@ export class creatObjects implements Objects {
             };
             await this.createDataPoint(`${this.dev.dp}.status.online`, common, "state", false, null, null);
             common = {
+                type: "boolean",
+                role: "button",
+                name: {
+                    en: "Check Monitoring",
+                    de: "Überwachung prüfen",
+                    ru: "Проверка мониторинга",
+                    pt: "Verificar monitoramento",
+                    nl: "Controleer de monitoring",
+                    fr: "Vérifier la surveillance",
+                    it: "Controllo del monitoraggio",
+                    es: "Verificar el monitoreo",
+                    pl: "Sprawdź monitorowanie",
+                    uk: "Перевірте моніторинг",
+                    "zh-cn": "检查监控",
+                },
+                desc: "Create by Adapter",
+                read: false,
+                write: true,
+            };
+            await this.createDataPoint(`${this.dev.dp}.status.monitoring_check`, common, "state", null, null, null);
+            common = {
+                type: "boolean",
+                role: "switch",
+                name: {
+                    en: "Status Monitoring",
+                    de: "Statusüberwachung",
+                    ru: "Мониторинг состояния",
+                    pt: "Monitoramento de status",
+                    nl: "Statusbewaking",
+                    fr: "Surveillance de l'état",
+                    it: "Monitoraggio dello stato",
+                    es: "Monitoreo de estado",
+                    pl: "Monitorowanie statusu",
+                    uk: "Моніторинг стану",
+                    "zh-cn": "状态监控",
+                },
+                desc: "Create by Adapter",
+                read: true,
+                write: false,
+                def: false,
+            };
+            await this.createDataPoint(`${this.dev.dp}.status.monitoring_status`, common, "state", false, null, null);
+            common = {
+                type: "string",
+                role: "state",
+                name: {
+                    en: "Monitoring Type",
+                    de: "Überwachungstyp",
+                    ru: "Тип мониторинга",
+                    pt: "Tipo de monitoramento",
+                    nl: "Monitoringstype",
+                    fr: "Type de surveillance",
+                    it: "Tipo di monitoraggio",
+                    es: "Tipo de monitoreo",
+                    pl: "Typ monitorowania",
+                    uk: "Тип моніторингу",
+                    "zh-cn": "监测类型",
+                },
+                desc: "Create by Adapter",
+                read: true,
+                write: false,
+                def: "off",
+                states: {
+                    off: "Off",
+                    dgram: "UDP4 Socket",
+                    dns: "Multicast DNS",
+                },
+            };
+            await this.createDataPoint(`${this.dev.dp}.status.monitoring_type`, common, "state", "off", null, null);
+            if (this.dev.discover === "dgram") {
+                common = {
+                    type: "string",
+                    role: "state",
+                    name: {
+                        en: "SSDP IP",
+                        de: "SSDP IP",
+                        ru: "IP-адрес SSDP",
+                        pt: "IP SSDP",
+                        nl: "SSDP IP",
+                        fr: "SSDP IP",
+                        it: "IP SSDP",
+                        es: "SSDP IP",
+                        pl: "Adres IP SSDP",
+                        uk: "IP-адреса SSDP",
+                        "zh-cn": "SSDP IP",
+                    },
+                    desc: "Create by Adapter",
+                    read: true,
+                    write: true,
+                    def: "239.255.255.250",
+                };
+                await this.createDataPoint(`${this.dev.dp}.status.ssdp_ip`, common, "state", null, null, null);
+                common = {
+                    type: "number",
+                    role: "value",
+                    name: {
+                        en: "SSDP Port",
+                        de: "SSDP-Port",
+                        ru: "Порт SSDP",
+                        pt: "Porta SSDP",
+                        nl: "SSDP-poort",
+                        fr: "Port SSDP",
+                        it: "Porta SSDP",
+                        es: "Puerto SSDP",
+                        pl: "Port SSDP",
+                        uk: "Порт SSDP",
+                        "zh-cn": "SSDP端口",
+                    },
+                    desc: "Create by Adapter",
+                    read: true,
+                    write: true,
+                    def: 1900,
+                };
+                await this.createDataPoint(`${this.dev.dp}.status.ssdp_port`, common, "state", null, null, null);
+                let ssdp_msg = `M-SEARCH * HTTP/1.1\r\n`;
+                ssdp_msg += `HOST: <ip>:<port>\r\n`;
+                ssdp_msg += `MAN: "ssdp:discover"\r\n`;
+                ssdp_msg += `MX: 5\r\n`;
+                ssdp_msg += `ST: urn:dial-multiscreen-org:service:dial:1\r\n`;
+                ssdp_msg += `USER-AGENT: ioBroker\r\n\r\n`;
+                const old_msg = await this.adapter.getStateAsync(`${this.dev.dp}.status.ssdp_msg`);
+                let msg = ssdp_msg;
+                if (old_msg && old_msg.val && typeof old_msg.val === "string") {
+                    msg = old_msg.val;
+                }
+                common = {
+                    type: "string",
+                    role: "state",
+                    name: {
+                        en: "SSDP Message",
+                        de: "SSDP-Nachricht",
+                        ru: "Сообщение SSDP",
+                        pt: "Mensagem SSDP",
+                        nl: "SSDP-bericht",
+                        fr: "Message SSDP",
+                        it: "Messaggio SSDP",
+                        es: "Mensaje SSDP",
+                        pl: "Wiadomość SSDP",
+                        uk: "Повідомлення SSDP",
+                        "zh-cn": "SSDP消息",
+                    },
+                    desc: "Create by Adapter",
+                    read: true,
+                    write: true,
+                    def: msg,
+                };
+                await this.createDataPoint(`${this.dev.dp}.status.ssdp_msg`, common, "state", msg, null, null);
+            } else {
+                await this.adapter.delObjectAsync(`${this.dev.dp}.status.ssdp_ip`, { recursive: true });
+                await this.adapter.delObjectAsync(`${this.dev.dp}.status.ssdp_port`, { recursive: true });
+                await this.adapter.delObjectAsync(`${this.dev.dp}.status.ssdp_msg`, { recursive: true });
+            }
+            common = {
                 type: "string",
                 role: "json",
                 name: {

@@ -37,6 +37,7 @@ var import_node_events = require("node:events");
 class lgtv_discovery extends import_node_events.EventEmitter {
   ssdp_ip;
   ssdp_port;
+  ssdp_msg;
   ssdp_socket;
   adapter;
   message;
@@ -53,21 +54,83 @@ class lgtv_discovery extends import_node_events.EventEmitter {
     this.ssdp_ip = "239.255.255.250";
     this.ssdp_port = 1900;
     this.sendTimeout = void 0;
-    let ssdp_msg = `M-SEARCH * HTTP/1.1\r
+    this.ssdp_msg = `M-SEARCH * HTTP/1.1\r
 `;
-    ssdp_msg += `HOST: ${this.ssdp_ip}:${this.ssdp_port}\r
+    this.ssdp_msg += `HOST: <ip>:<port>\r
 `;
-    ssdp_msg += `MAN: "ssdp:discover"\r
+    this.ssdp_msg += `MAN: "ssdp:discover"\r
 `;
-    ssdp_msg += `MX: 5\r
+    this.ssdp_msg += `MX: 5\r
 `;
-    ssdp_msg += `ST: urn:dial-multiscreen-org:service:dial:1\r
+    this.ssdp_msg += `ST: urn:dial-multiscreen-org:service:dial:1\r
 `;
-    ssdp_msg += `USER-AGENT: ioBroker\r
+    this.ssdp_msg += `USER-AGENT: ioBroker\r
 \r
 `;
-    this.message = import_node_buffer.Buffer.from(ssdp_msg);
+    this.ssdp_msg = this.ssdp_msg.replace("<ip>", this.ssdp_ip);
+    this.ssdp_msg = this.ssdp_msg.replace("<port>", this.ssdp_port.toString());
+    this.message = import_node_buffer.Buffer.from(this.ssdp_msg);
     this.log = false;
+  }
+  /**
+   * Change Message
+   *
+   * @param msg Message
+   */
+  setMsg(msg) {
+    this.ssdp_msg = msg;
+    msg = msg.replace("<port>", this.ssdp_port.toString());
+    msg = msg.replace("<ip>", this.ssdp_ip);
+    this.message = import_node_buffer.Buffer.from(msg);
+  }
+  /**
+   * Change IP
+   *
+   * @param ip IP
+   */
+  setIp(ip) {
+    let msg = this.ssdp_msg;
+    msg = msg.replace("<port>", this.ssdp_port.toString());
+    msg = msg.replace("<ip>", ip);
+    this.message = import_node_buffer.Buffer.from(msg);
+  }
+  /**
+   * Change Port
+   *
+   * @param port Port
+   */
+  setPort(port) {
+    let msg = this.ssdp_msg;
+    msg = msg.replace("<port>", port);
+    msg = msg.replace("<ip>", this.ssdp_ip);
+    this.message = import_node_buffer.Buffer.from(msg);
+  }
+  /**
+   * Set SSDP Data
+   *
+   * @param dp Object Device
+   */
+  async setData(dp) {
+    const msg = await this.adapter.getStateAsync(`${dp}.status.ssdp_msg`);
+    const ip = await this.adapter.getStateAsync(`${dp}.status.ssdp_ip`);
+    const port = await this.adapter.getStateAsync(`${dp}.status.ssdp_port`);
+    if (msg && msg.val && typeof msg.val === "string") {
+      this.ssdp_msg = msg.val;
+      let ssdp_msg = msg.val;
+      if (ip && ip.val && typeof ip.val === "string") {
+        ssdp_msg = ssdp_msg.replace("<ip>", ip.val);
+        this.ssdp_ip = ip.val;
+      } else {
+        ssdp_msg = ssdp_msg.replace("<ip>", this.ssdp_ip);
+      }
+      if (port && port.val && typeof port.val === "number") {
+        ssdp_msg = ssdp_msg.replace("<port>", port.val.toString());
+        this.ssdp_port = port.val;
+      } else {
+        ssdp_msg = ssdp_msg.replace("<port>", this.ssdp_port.toString());
+      }
+      this.message = import_node_buffer.Buffer.from(ssdp_msg);
+    }
   }
   /**
    * Send SSDP Discovery Message
@@ -84,16 +147,14 @@ class lgtv_discovery extends import_node_events.EventEmitter {
         this.ssdp_port,
         this.ssdp_ip,
         (error) => {
-          if (error) {
-            this.ssdp_socket.close();
-            this.emit("update", "sendError");
-            if (typeof error === "string") {
-              this.adapter.log.error(`discovery: ${error}`);
-            } else if (error instanceof Error) {
-              this.adapter.log.error(`discovery: ${error.name}: ${error.message}`);
-            }
-            this.ssdp_socket = void 0;
+          this.ssdp_socket.close();
+          this.emit("update", "sendError");
+          if (typeof error === "string") {
+            this.adapter.log.error(`discovery: ${error}`);
+          } else if (error instanceof Error) {
+            this.adapter.log.error(`discovery: ${error.name}: ${error.message}`);
           }
+          this.ssdp_socket = void 0;
         }
       );
     }
@@ -121,6 +182,18 @@ class lgtv_discovery extends import_node_events.EventEmitter {
         this.sendTimeout = void 0;
         this._send_ssdp_discover();
       }, 5 * 1e3);
+    });
+    this.ssdp_socket.on("listening", () => {
+      const address = this.ssdp_socket.address();
+      this.adapter.log.debug(`server listening ${address.address}:${address.port}`);
+    });
+    this.ssdp_socket.on("close", () => {
+      console.log("Socket closed successfully.");
+      this.emit("update", "close");
+    });
+    this.ssdp_socket.on("connect", () => {
+      console.log("Socket connected successfully.");
+      this.emit("update", "connect");
     });
     this.ssdp_socket.on("error", (error) => {
       this.emit("update", "error");
