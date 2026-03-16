@@ -141,9 +141,11 @@ class lgtv_discovery extends import_node_events.EventEmitter {
       this.adapter.log.error(`Discover sspd socket not open!!!`);
       this.emit("update", "socket");
     } else {
-      this.adapter.log.debug(`IP: ${this.ssdp_ip}`);
-      this.adapter.log.debug(`PORT: ${this.ssdp_port}`);
-      this.adapter.log.debug(`Message: ${this.message.toString()}`);
+      if (this.log) {
+        this.adapter.log.debug(`IP: ${this.ssdp_ip}`);
+        this.adapter.log.debug(`PORT: ${this.ssdp_port}`);
+        this.adapter.log.debug(`Message: ${this.message.toString()}`);
+      }
       this.ssdp_socket.send(this.message, 0, this.message.length, this.ssdp_port, this.ssdp_ip);
     }
   }
