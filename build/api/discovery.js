@@ -129,6 +129,7 @@ class lgtv_discovery extends import_node_events.EventEmitter {
       } else {
         ssdp_msg = ssdp_msg.replace("<port>", this.ssdp_port.toString());
       }
+      this.adapter.log.debug(`Data: ${ssdp_msg}`);
       this.message = import_node_buffer.Buffer.from(ssdp_msg);
     }
   }
@@ -140,23 +141,10 @@ class lgtv_discovery extends import_node_events.EventEmitter {
       this.adapter.log.error(`Discover sspd socket not open!!!`);
       this.emit("update", "socket");
     } else {
-      this.ssdp_socket.send(
-        this.message,
-        0,
-        this.message.length,
-        this.ssdp_port,
-        this.ssdp_ip,
-        (error) => {
-          this.ssdp_socket.close();
-          this.emit("update", "sendError");
-          if (typeof error === "string") {
-            this.adapter.log.error(`discovery: ${error}`);
-          } else if (error instanceof Error) {
-            this.adapter.log.error(`discovery: ${error.name}: ${error.message}`);
-          }
-          this.ssdp_socket = void 0;
-        }
-      );
+      this.adapter.log.debug(`IP: ${this.ssdp_ip}`);
+      this.adapter.log.debug(`PORT: ${this.ssdp_port}`);
+      this.adapter.log.debug(`Message: ${this.message.toString()}`);
+      this.ssdp_socket.send(this.message, 0, this.message.length, this.ssdp_port, this.ssdp_ip);
     }
   }
   /**
@@ -167,6 +155,8 @@ class lgtv_discovery extends import_node_events.EventEmitter {
   discovery(ip) {
     this.ssdp_socket = import_node_dgram.default.createSocket("udp4");
     this.ssdp_socket.on("listening", () => {
+      const address = this.ssdp_socket.address();
+      this.adapter.log.debug(`server listening ${address.address}:${address.port}`);
       this._send_ssdp_discover();
     });
     this.ssdp_socket.on("message", (message, remote) => {
@@ -183,11 +173,9 @@ class lgtv_discovery extends import_node_events.EventEmitter {
         this._send_ssdp_discover();
       }, 5 * 1e3);
     });
-    this.ssdp_socket.on("listening", () => {
-      const address = this.ssdp_socket.address();
-      this.adapter.log.debug(`server listening ${address.address}:${address.port}`);
-    });
     this.ssdp_socket.on("close", () => {
+      this.sendTimeout && this.adapter.clearTimeout(this.sendTimeout);
+      this.ssdp_socket = void 0;
       console.log("Socket closed successfully.");
       this.emit("update", "close");
     });
@@ -196,14 +184,17 @@ class lgtv_discovery extends import_node_events.EventEmitter {
       this.emit("update", "connect");
     });
     this.ssdp_socket.on("error", (error) => {
-      this.emit("update", "error");
+      this.sendTimeout && this.adapter.clearTimeout(this.sendTimeout);
       if (typeof error === "string") {
-        this.adapter.log.error(`discovery: ${error}`);
+        this.adapter.log.error(`discovery 1: ${error}`);
       } else if (error instanceof Error) {
-        this.adapter.log.error(`discovery: ${error.name}: ${error.message}`);
+        this.adapter.log.error(`discovery 2: ${error.name}: ${error.message}`);
+      } else {
+        this.adapter.log.error(`discovery 3: ${JSON.stringify(error)}`);
       }
       this.ssdp_socket.close();
       this.ssdp_socket = void 0;
+      this.emit("update", "error");
     });
     this.ssdp_socket.bind();
   }

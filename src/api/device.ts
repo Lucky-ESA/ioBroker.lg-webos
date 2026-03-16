@@ -980,7 +980,7 @@ export class TVHandler extends EventEmitter implements Device {
             await this.sleep(500);
             this.delayStartWebSocket();
             await this.setWatching(true);
-        } else if (type == "socket" || type == "sendError" || type == "error") {
+        } else if (type == "socket" || type == "error") {
             if (this.ip && !this.isConnected) {
                 this.discover.destroy();
                 await this.sleep(3000);
@@ -989,13 +989,7 @@ export class TVHandler extends EventEmitter implements Device {
             }
         } else if (type == "close") {
             this.adapter.log.debug(`UDP4 closed for device ${this.ip}`);
-            await this.sleep(5000);
-            if (this.ip && !this.isConnected) {
-                this.discover.destroy();
-                await this.sleep(3000);
-                this.discover.discovery(this.ip);
-                await this.setWatching(true);
-            }
+            await this.setWatching(false);
         } else if (type == "connect") {
             this.adapter.log.debug(`UDP4 connected for device ${this.ip}`);
         }

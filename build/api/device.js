@@ -925,7 +925,7 @@ class TVHandler extends import_node_events.EventEmitter {
       await this.sleep(500);
       this.delayStartWebSocket();
       await this.setWatching(true);
-    } else if (type == "socket" || type == "sendError" || type == "error") {
+    } else if (type == "socket" || type == "error") {
       if (this.ip && !this.isConnected) {
         this.discover.destroy();
         await this.sleep(3e3);
@@ -934,13 +934,7 @@ class TVHandler extends import_node_events.EventEmitter {
       }
     } else if (type == "close") {
       this.adapter.log.debug(`UDP4 closed for device ${this.ip}`);
-      await this.sleep(5e3);
-      if (this.ip && !this.isConnected) {
-        this.discover.destroy();
-        await this.sleep(3e3);
-        this.discover.discovery(this.ip);
-        await this.setWatching(true);
-      }
+      await this.setWatching(false);
     } else if (type == "connect") {
       this.adapter.log.debug(`UDP4 connected for device ${this.ip}`);
     }
