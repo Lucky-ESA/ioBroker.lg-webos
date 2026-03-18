@@ -257,6 +257,9 @@ class TVHandler extends import_node_events.EventEmitter {
                 void this.updateStates(payload);
               }
             } else if (payload.type == "error") {
+              if (type == "register" && payload.error == "403 User denied access") {
+                void this.updateStates({ type: "error", id: "", payload: { appId: "" } });
+              }
               if (type == "Own") {
                 void this.ownRequest(payload);
               } else if (typeof type === "object" && type.callback) {
@@ -478,8 +481,10 @@ class TVHandler extends import_node_events.EventEmitter {
           await this.sleep(500);
           this.discover.discovery(this.ip);
           await this.setWatching(true);
+          await this.updateStatus(false);
         } else {
           await this.setWatching(false);
+          await this.updateStatus(true);
         }
       } else {
         if (!this.isConnected || !this.isRegistered) {
@@ -489,8 +494,10 @@ class TVHandler extends import_node_events.EventEmitter {
           }
           this.startMulticast();
           await this.setWatching(true);
+          await this.updateStatus(false);
         } else {
           await this.setWatching(false);
+          await this.updateStatus(true);
         }
       }
       await this.setAckFlag(id);
