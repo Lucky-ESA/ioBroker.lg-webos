@@ -25,9 +25,9 @@ Some TVs disconnect the WebSocket connection without indicating this. For these 
 
 ## Requirements
 
-- Node 20, 22 or 24
+- Node 22 or 24
 - JS-Controller >= 6.0.11
-- Admin >= 7.7.22
+- Admin >= 7.8.23
 - LG TV with >= WebOS 20
 
 ## Description
